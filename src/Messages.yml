@@ -1,0 +1,42 @@
+#colors...
+#If you don't want to use it, just leave: ""
+prefix: "&5[&6Admin&2Tools&5] "
+message_color: "&r&a"
+message_variable_color: "&2&l"
+error_color: "&r&c"
+error_variable_color: "&4&l"
+
+#messages...
+#DO NOT TOUCH: %1, %2, %3 etc. - this is space for variables :)
+#Use %s to set color of message to color that is reserved for variables (see colors section), use %n to return color back to normal.
+#Variables are colored automatically (colors section above to change colors of it or completely remove  
+#You can also use standard minecraft colors (&1, &2, &c, etc.), but it's better to use colors section (so you don't have to edit all messages when you want to change colors)
+
+#messages
+
+#error messages
+error_permission: "Nie posiadasz odpowiednich uprawnien aby uzyc tej komendy!"
+
+
+#help pages
+help: "Pomoc pluginu %sAdminTools%n:"
+help_1: "%s/at mining %n- Wyswietla graczy, ktorzy sa ponizej 20 poziomu Y."
+help_2: "%s/cc %n- Czysci chat."
+help_3: "%s/at permissions %n- Wyswietla uprawnienia pluginu."
+help_4: "%s/at help %n- Wyswietla pomoc pluginu."
+help_5: "%s/at warp %n- Wyswietla liste warpow."
+help_6: "%s/at warp <warp>%n- Teleportuje na dany warp."
+help_7: "%s/at setwarp <warp>%n- Ustawia/zmienia lokacje warpu."
+help_8: "%s/at delwarp <warp>%n- Usuwa dany warp."
+
+#Simple messages
+#(Messages that are used instead of variables in some situations)
+#I strongly reccomend not to use color codes here (But still you can if you want to)
+none: "%sBrak"
+set: "%sUstawiono"
+not_set: "%sNie ustawiono!"
+yes: "%stak"
+no: "%snie"
+unlimited: "%snieograniczona"
+loc: "%1/%2/%3 w %4"
+

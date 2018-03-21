@@ -1,0 +1,10 @@
+name: Nations
+main: com.gmail.ZiomuuSs.Main
+version: 0.4
+softdepend: [AdminTools]
+depend: [WorldGuard]
+commands:
+   Nation:
+      aliases: [n]
+      description: Komenda panstw.
+      usage: /n
