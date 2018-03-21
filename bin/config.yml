@@ -1,0 +1,20 @@
+# Main config file
+
+# Nam of default faction (if an estate is not belonging to any exiting nation, it belongs to this nation)
+outlawNation: "Bandyci"
+
+#MYSQL data
+# MYSQL is REQUIRED to make plugin work
+mysql:
+  #host
+  host: "localhost"
+  #mysql database
+  database: "minecraft"
+  #mysql username
+  username: "root"
+  #password to user
+  password: "pass"
+  #mysql port
+  port: 3306
+  #prefix of table name
+  prefix: "Nations_"
