@@ -5,15 +5,16 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.gmail.ZiomuuSs.Main;
+import com.gmail.ZiomuuSs.Nation.Nation;
+import com.gmail.ZiomuuSs.Utils.ConfigLoader;
 import com.gmail.ZiomuuSs.Utils.msg;
 
 
 public class NationCommand implements CommandExecutor {
-  Main plugin;
+  ConfigLoader config;
   
-  public NationCommand(Main instance) {
-    plugin = instance;
+  public NationCommand(ConfigLoader config) {
+    this.config = config;
   }
   
   @Override
@@ -31,6 +32,13 @@ public class NationCommand implements CommandExecutor {
       switch (args[0].toLowerCase()) {
       case "create":
         //todo
+        if (!c.hasPermission("Nations.create", "Nations.*")) return true;
+        if (args.length>1) {
+          if (!c.isNotNation(args[1])) return true;
+          new Nation(args[1], config);
+        } else {
+          sender.sendMessage(msg.get("error_usage", true, "/n create <name>"));
+        }
         break;
       case "info":
         //todo
@@ -48,6 +56,8 @@ public class NationCommand implements CommandExecutor {
     }
   return true;
   }
+  
+  
   
   
 }

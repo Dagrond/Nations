@@ -1,16 +1,15 @@
 package com.gmail.ZiomuuSs.Utils;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.io.File;
 import java.util.HashSet;
-import java.util.logging.Level;
 
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 
 import com.gmail.ZiomuuSs.Main;
+import com.gmail.ZiomuuSs.Nation.City;
+import com.gmail.ZiomuuSs.Nation.Estate;
 import com.gmail.ZiomuuSs.Nation.Group;
+import com.gmail.ZiomuuSs.Nation.Language;
 import com.gmail.ZiomuuSs.Nation.Nation;
 import com.gmail.ZiomuuSs.Nation.NationMember;
 
@@ -21,63 +20,61 @@ public class ConfigLoader {
   private HashSet<Nation> nations = new HashSet<>(); //list of all nations
   //options variables
   public String outlawNation; //name of nation that is always default (if an estate is not belonging to any exiting nation, it belongs to this faction
-  private Connection connection; //mysql connection
-  private String host, database, username, password, prefix; //mysql data
-  private int port; //mysql port
   
-  ConfigLoader(Main plugin) {
+  public ConfigLoader(Main plugin) {
     this.plugin = plugin;
     plugin.saveDefaultConfig();
     msgAccessor = new ConfigAccessor(plugin, "Messages.yml");
     msgAccessor.saveDefaultConfig();
     msg.set(msgAccessor.getConfig());
     config = plugin.getConfig();
-    loadOptions();
-    try {
-      connectToMySQL();
-    } catch (Exception e) {
-      Bukkit.getLogger().log(Level.SEVERE, "[Nations] CANNOT CONNECT TO MYSQL DATABASE! SWITCHING OFF PLUGIN!", e);
-      Bukkit.getPluginManager().disablePlugin(plugin);
-    }
+    loadAll();
   }
-
-  private void connectToMySQL() throws SQLException, ClassNotFoundException, NullPointerException{
-      if (connection != null && !connection.isClosed()) {
-          return;
-      }
-   
-      synchronized (this) {
-          Class.forName("com.mysql.jdbc.Driver");
-          connection = DriverManager.getConnection("jdbc:mysql://" + host+ ":" + port + "/" + database, username, password);
-      }
-  }
-  
-  private void loadOptions() {
-    outlawNation = config.getString("outlawNation");
-    database = config.getString("mysql.database");
-    host = config.getString("mysql.host");
-    username = config.getString("mysql.username");
-    password = config.getString("mysql.password");
-    prefix = config.getString("mysql.prefix");
-    port = config.getInt("mysql.port");
-  }
-  
-  //methods connected with nations
   
   //loading nations
-  private void loadNations() {
-    
+  private void loadAll() {
+    outlawNation = config.getString("outlawNation");
   }
   
   public void saveNation(Nation nation) {
+    new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Nations", nation.toString()+".yml").delete();
+    ConfigAccessor ca = new ConfigAccessor(plugin, nation.toString()+".yml", "Nations");
+    ConfigurationSection cs = ca.getConfig();
+    //todo
+  }
+  
+  public void saveLanguage(Language language) {
+    new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Languages", language.toString()+".yml").delete();
+    ConfigAccessor ca = new ConfigAccessor(plugin, language.toString()+".yml", "Languages");
+    ConfigurationSection cs = ca.getConfig();
     //todo
   }
   
   public void saveNationMember(NationMember player) {
+    new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Players", player.toString()+".yml").delete();
+    ConfigAccessor ca = new ConfigAccessor(plugin, player.toString()+".yml", "Players");
+    ConfigurationSection cs = ca.getConfig();
     //todo
   }
   
   public void saveGroup(Group group) {
+    new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Groups", group.toString()+".yml").delete();
+    ConfigAccessor ca = new ConfigAccessor(plugin, group.toString()+".yml", "Groups");
+    ConfigurationSection cs = ca.getConfig();
+    //todo
+  }
+  
+  public void saveEstate(Estate estate) {
+    new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Estates", estate.toString()+".yml").delete();
+    ConfigAccessor ca = new ConfigAccessor(plugin, estate.toString()+".yml", "Estates");
+    ConfigurationSection cs = ca.getConfig();
+    //todo
+  }
+  
+  public void saveCity(City city) {
+    new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Cities", city.toString()+".yml").delete();
+    ConfigAccessor ca = new ConfigAccessor(plugin, city.toString()+".yml", "Cities");
+    ConfigurationSection cs = ca.getConfig();
     //todo
   }
 }

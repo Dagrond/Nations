@@ -13,11 +13,15 @@ error_variable_color: "&4&l"
 #You can also use standard minecraft colors (&1, &2, &c, etc.), but it's better to use colors section (so you don't have to edit all messages when you want to change colors)
 
 #messages
+nation_member_added: "Gracz %1 dolaczyl do Twojego panstwa!"
+nation_joined: "Pomyslnie dolaczyles do panstwa %1!"
+
 
 #error messages
 error_permission: "Nie posiadasz odpowiednich uprawnien aby uzyc tej komendy!"
 error_usage: "Poprawne uzycie: %1"
 error_player_needed: "Ta komende moze uzyc tylko gracz!"
+error_not_a_nation: "Panstwo %1 nie istnieje!"
 
 #help pages
 
