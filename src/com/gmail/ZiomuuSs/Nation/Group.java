@@ -3,6 +3,7 @@ package com.gmail.ZiomuuSs.Nation;
 import java.util.HashSet;
 
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 
 import com.gmail.ZiomuuSs.Utils.ConfigLoader;
 
@@ -25,7 +26,7 @@ public class Group {
      * GIVE_RANK - player can give ranks to other players (that are in lower rank)
      * BYPASS_BUILD - player can build on every city of this nation (including member's plots)
      * BUILD_CITY - player can build in specific city
-     * KING - this permissions contains all other permissions
+     * ALL - this permissions contains all other permissions (but still, king is higher than this perm)
      */
   }
   private ConfigLoader config;
@@ -41,6 +42,7 @@ public class Group {
     this.nation = nation;
     groups.add(this);
     this.config = config;
+    config.saveGroup(this);
   }
   
   
@@ -89,10 +91,10 @@ public class Group {
     return nation;
   }
   
-  public HashSet<Group> getAllGroupsInNation(Nation nation) {
+  public static HashSet<Group> getAllGroupsInNation(Nation nation) {
     HashSet<Group> all = new HashSet<>();
-    for(Group group : groups) {
-      if (group.getNation().equals(nation)) all.add(group);
+    for(Group g : groups) {
+      if (g.getNation().equals(nation)) all.add(g);
     }
     return all;
   }

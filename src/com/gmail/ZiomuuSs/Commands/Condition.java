@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import com.gmail.ZiomuuSs.Nation.Group.NationPermission;
 import com.gmail.ZiomuuSs.Nation.Nation;
 import com.gmail.ZiomuuSs.Nation.NationMember;
 import com.gmail.ZiomuuSs.Utils.msg;
@@ -15,10 +16,29 @@ public class Condition {
     this.player = player;
   }
   
+  public boolean hasNation() {
+    if (Nation.getPlayerNation(player) == null) {
+      player.sendMessage(msg.get("error_not_in_nation", true));
+      return false;
+    } else {
+      return true;
+    }
+  }
+  
   public boolean hasPermission(String...perm) {
     if (perm.length<1) return true;
     for (String p : perm) {
       if (!player.hasPermission(p) && !player.isOp())
+        player.sendMessage(msg.get("error_permission", true));
+        return false;
+    }
+    return true;
+  }
+  
+  public boolean hasNationPermission(String...perm) {
+    if (perm.length<1) return true;
+    for (String p : perm) {
+      if (!NationMember.matchMemberByPlayer(player).hasPermission(NationPermission.valueOf(p)))
         player.sendMessage(msg.get("error_permission", true));
         return false;
     }
