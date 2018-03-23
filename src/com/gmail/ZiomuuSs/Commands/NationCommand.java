@@ -5,6 +5,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.gmail.ZiomuuSs.Nation.Group;
 import com.gmail.ZiomuuSs.Nation.Nation;
 import com.gmail.ZiomuuSs.Utils.ConfigLoader;
 import com.gmail.ZiomuuSs.Utils.msg;
@@ -31,13 +32,44 @@ public class NationCommand implements CommandExecutor {
       if (args.length<1) sender.sendMessage(msg.get("error_usage", true, "/n help"));
       switch (args[0].toLowerCase()) {
       case "create":
-        //todo
         if (!c.hasPermission("Nations.create", "Nations.*")) return true;
-        if (args.length>1) {
+        if (args.length>2) {
           if (!c.isNotNation(args[1])) return true;
-          new Nation(args[1], config);
+          if (!c.notMemberofNation(args[2])) return true;
+          new Nation(config, args[1], args[2]);
+          sender.sendMessage(msg.get("nation_created", true, args[1], args[2]));
         } else {
-          sender.sendMessage(msg.get("error_usage", true, "/n create <name>"));
+          sender.sendMessage(msg.get("error_usage", true, "/n create <name> <king>"));
+        }
+        break;
+      case "rank":
+        if (args.length>2) {
+          Group group = Group.matchGroup(args[1], Nation.getPlayerNation(player));
+          if (group == null) {
+            sender.sendMessage(msg.get("error_group_not_exist", true, args[1]));
+            return true;
+          }
+          switch (args[2].toLowerCase()) {
+          case "list":
+            //todo
+            break;
+          case "perm":
+            //todo
+            break;
+          case "add":
+            //todo
+            break;
+          case "del":
+            //todo
+            break;
+          case "promote":
+            //todo
+            break;
+          default:
+            sender.sendMessage(msg.get("error_usage", true, "/n rank <rank> <list/perm/add/del/promote>"));
+          }
+        } else {
+          sender.sendMessage(msg.get("error_usage", true, "/n rank <rank> <list/perm/add/del/promote>"));
         }
         break;
       case "info":

@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 
 import com.gmail.ZiomuuSs.Utils.ConfigLoader;
 import com.gmail.ZiomuuSs.Utils.msg;
-import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 
 /*
  *  Nation class
@@ -20,16 +19,18 @@ public class Nation {
   private static HashSet<Nation> nations = new HashSet<>(); //list of all nations
   private ConfigLoader config;
   private String name; //name of nation
+  private UUID king; //king of nation
   private HashSet<Estate> estates = new HashSet<>(); //estates of this nation
   private HashSet<Group> groups = new HashSet<>(); //all groups created by this faction
   private Language language; //language of this nation
   private HashMap<UUID, NationMember> members = new HashMap<>(); //list of members of that nation, with groups of player
   
-  public Nation(String name, ConfigLoader config) {
+  @SuppressWarnings("deprecation")
+  public Nation(ConfigLoader config, String name, String player) {
     this.name = name;
     nations.add(this);
     this.config = config;
-    
+    king = Bukkit.getOfflinePlayer(player).getUniqueId();
   }
   
   public void broadcastToOnlineMembers(String message) {
@@ -66,6 +67,13 @@ public class Nation {
   @Override
   public String toString() {
     return name;
+  }
+  
+  public static Nation getPlayerNation(Player player) {
+    for (Nation nation : nations) {
+      if (nation.isMember(player.getUniqueId())) return nation;
+    }
+    return null;
   }
   
   public NationMember getMember(UUID uuid) {

@@ -1,6 +1,5 @@
 package com.gmail.ZiomuuSs.Nation;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
 
@@ -34,6 +33,10 @@ public class NationMember {
   @Override
   public String toString() {
     return Bukkit.getOfflinePlayer(player).getName();
+  }
+  
+  public UUID getUUID() {
+    return player;
   }
   
   public int getPvPRank() {

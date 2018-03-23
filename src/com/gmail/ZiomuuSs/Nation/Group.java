@@ -2,6 +2,10 @@ package com.gmail.ZiomuuSs.Nation;
 
 import java.util.HashSet;
 
+import org.bukkit.ChatColor;
+
+import com.gmail.ZiomuuSs.Utils.ConfigLoader;
+
 /*
  * Group class
  * this stores all information about player's created groups
@@ -24,6 +28,7 @@ public class Group {
      * KING - this permissions contains all other permissions
      */
   }
+  private ConfigLoader config;
   private Nation nation; //nation that groups belongs into
   private String name; //name of group
   private HashSet<City> buildCities = new HashSet<>(); //cities that this player is supposed to build
@@ -31,20 +36,65 @@ public class Group {
   private String prefix = ""; //prefix of this group on chat
   private HashSet<NationPermission> permittedActions = new HashSet<>(); //all actions that are permitted for this group
   
-  public Group(String name, Nation nation) {
+  public Group(String name, Nation nation, ConfigLoader config) {
     this.name = name;
     this.nation = nation;
     groups.add(this);
+    this.config = config;
   }
   
   
   
+  //setters
   
+  public void setPriority(int priority) {
+    this.priority = priority;
+    config.saveGroup(this);
+  }
   
+  public void setPrefix(String prefix) {
+    this.prefix = ChatColor.translateAlternateColorCodes('&', prefix);
+    config.saveGroup(this);
+  }
+  
+  public void delPermission(String perm) {
+    permittedActions.remove(NationPermission.valueOf(perm));
+    config.saveGroup(this);
+  }
+  
+  public void addPermission(String perm) {
+    permittedActions.add(NationPermission.valueOf(perm));
+    config.saveGroup(this);
+  }
+  
+  //checkers
+  
+  public boolean hasPermission(NationPermission perm) {
+    return permittedActions.contains(perm);
+  }
   
   //getters
+  public static Group matchGroup(String name, Nation nation) {
+    for(Group group : groups) {
+      if (group.getNation().equals(nation) && group.toString().equals(name)) return group;
+    }
+    return null;
+  }
+  
   public HashSet<NationPermission> getPermissions() {
     return permittedActions;
+  }
+  
+  public Nation getNation() {
+    return nation;
+  }
+  
+  public HashSet<Group> getAllGroupsInNation(Nation nation) {
+    HashSet<Group> all = new HashSet<>();
+    for(Group group : groups) {
+      if (group.getNation().equals(nation)) all.add(group);
+    }
+    return all;
   }
   
   @Override

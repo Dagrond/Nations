@@ -14,6 +14,7 @@ error_variable_color: "&4&l"
 
 #messages
 nation_member_added: "Gracz %1 dolaczyl do Twojego panstwa!"
+nation_created: "Pomyslnie utworzyles frakcje %1 z graczem %2 jako generalem!"
 nation_joined: "Pomyslnie dolaczyles do panstwa %1!"
 
 
@@ -22,6 +23,9 @@ error_permission: "Nie posiadasz odpowiednich uprawnien aby uzyc tej komendy!"
 error_usage: "Poprawne uzycie: %1"
 error_player_needed: "Ta komende moze uzyc tylko gracz!"
 error_not_a_nation: "Panstwo %1 nie istnieje!"
+error_player_in_nation: "Gracz %1 jest juz w panstwie!"
+error_player_not_exist: "Gracz %1 nie istnieje!"
+error_group_not_exist: "Grupa %1 nie istnieje!"
 
 #help pages
 
