@@ -44,8 +44,12 @@ public class Nation {
   
   public void addMember(Player player) {
     broadcastToOnlineMembers(msg.get("nation_member_added", true, player.getDisplayName()));
-    members.put(player.getUniqueId(), new NationMember(player.getUniqueId(), this));
+    members.put(player.getUniqueId(), new NationMember(config, player.getUniqueId(), this));
     player.sendMessage(msg.get("nation_joined", true, name));
+  }
+  
+  public void setKing(UUID uuid) {
+    this.king = uuid;
   }
   
   //checkers
@@ -69,9 +73,13 @@ public class Nation {
     return name;
   }
   
-  public static Nation getPlayerNation(Player player) {
+  public UUID getKing() {
+    return king;
+  }
+  
+  public static Nation getPlayerNation(UUID uuid) {
     for (Nation nation : nations) {
-      if (nation.isMember(player.getUniqueId())) return nation;
+      if (nation.isMember(uuid)) return nation;
     }
     return null;
   }

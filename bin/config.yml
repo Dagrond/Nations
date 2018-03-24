@@ -1,4 +1,4 @@
 # Main config file
 
-# Nam of default faction (if an estate is not belonging to any exiting nation, it belongs to this nation)
-outlawNation: "Bandyci"
+# Name of non-nation players)
+NotInNation: "Nomad"

@@ -3,7 +3,6 @@ package com.gmail.ZiomuuSs.Nation;
 import java.util.HashSet;
 
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 
 import com.gmail.ZiomuuSs.Utils.ConfigLoader;
 
@@ -18,7 +17,7 @@ public class Group {
   private static HashSet<Group> groups = new HashSet<>(); //set of all groups
   public static enum NationPermission { //some kind of permissions 
     //TODO
-    KICK, ATTACK, INFO, GIVE_RANK, BYPASS_BUILD, BUILD_CITY, KING; 
+    KICK, ATTACK, INFO, GIVE_RANK, BYPASS_BUILD, BUILD_CITY, ALL; 
     /*
      * KICK - player can kick players out of nation
      * ATTACK - player can attack other nations buildings
@@ -67,6 +66,15 @@ public class Group {
   public void addPermission(String perm) {
     permittedActions.add(NationPermission.valueOf(perm));
     config.saveGroup(this);
+  }
+  
+  public void delGroup() {
+    for (NationMember member : NationMember.getMembers()) {
+      if (member.getNation().equals(nation) && member.getPlayerGroups().contains(this))
+        member.kickFromGroup(this);
+    }
+    groups.remove(this);
+    config.delSavedGroup(this);
   }
   
   //checkers

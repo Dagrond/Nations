@@ -1,12 +1,15 @@
 package com.gmail.ZiomuuSs.Commands;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.gmail.ZiomuuSs.Nation.Group;
+import com.gmail.ZiomuuSs.Nation.Group.NationPermission;
 import com.gmail.ZiomuuSs.Nation.Nation;
+import com.gmail.ZiomuuSs.Nation.NationMember;
 import com.gmail.ZiomuuSs.Utils.ConfigLoader;
 import com.gmail.ZiomuuSs.Utils.msg;
 
@@ -42,32 +45,119 @@ public class NationCommand implements CommandExecutor {
           sender.sendMessage(msg.get("error_usage", true, "/n create <name> <king>"));
         }
         break;
+      case "admin":
+        //todo
+        if (!c.hasPermission("Nations.admin", "Nations.*")) return true;
+        break;
       case "rank":
         if (!c.hasNation()) return true;
+        if (!c.isKing()) return true;
         if (args.length>2 && !args[1].equalsIgnoreCase("add") && args[1].equalsIgnoreCase("list")) {
-          Group group = Group.matchGroup(args[1], Nation.getPlayerNation(player));
+          Group group = Group.matchGroup(args[1], Nation.getPlayerNation(player.getUniqueId()));
           if (group == null) {
             sender.sendMessage(msg.get("error_group_not_exist", true, args[1]));
             return true;
           }
           switch (args[2].toLowerCase()) {
           case "perm":
-            //todo
+            if (args.length>3) {
+              switch (args[3].toLowerCase()) {
+              case "listall":
+                String list = "";
+                for (NationPermission g : NationPermission.values()) {
+                  list+= g.toString()+", ";
+                }
+                if (!list.equalsIgnoreCase(""))
+                  list = list.substring(0, list.length() - 2);
+                else
+                  list = msg.get("none", false);
+                player.sendMessage(msg.get("nation_group_allpermlist", true, list));
+                break;
+              case "list":
+                String l = "";
+                for (NationPermission g : group.getPermissions()) {
+                  l+= g.toString()+", ";
+                }
+                if (!l.equalsIgnoreCase(""))
+                  l = l.substring(0, l.length() - 2);
+                else
+                  l = msg.get("none", false);
+                player.sendMessage(msg.get("nation_group_permlist", true, args[1], l));
+                break;
+              case "add":
+                if (args.length>4) {
+                  if (!c.isPermission(args[4])) return true;
+                  if (!c.hasNationPermission(group, NationPermission.valueOf(args[4]))) return true;
+                  group.addPermission(args[4]);
+                  player.sendMessage(msg.get("nation_group_permission_added", true, args[4], args[1]));
+                  return true;
+                } else {
+                  player.sendMessage(msg.get("error_usage", true, "/n rank "+args[1]+" perm add <perm>"));
+                }
+                break;
+              case "del":
+                if (args.length>4) {
+                  if (!c.isPermission(args[4])) return true;
+                  if (!c.hasNationPermission(group, NationPermission.valueOf(args[4]))) return true;
+                  group.addPermission(args[4]);
+                  player.sendMessage(msg.get("nation_group_permission_deleted", true, args[4], args[1]));
+                  return true;
+                } else {
+                  player.sendMessage(msg.get("error_usage", true, "/n rank "+args[1]+" perm del <perm>"));
+                }
+                break;
+              default:
+                player.sendMessage(msg.get("error_usage", true, "/n rank <rank> perm list/listall/add/del"));
+                break;
+              }
+            } else
+              player.sendMessage(msg.get("error_usage", true, "/n rank <rank> perm list/listall/add/del"));
             break;
           case "del":
-            //todo
+            group.delGroup();
+            player.sendMessage(msg.get("nation_group_deleted", true, args[1]));
             break;
           case "promote":
-            //todo
+            if (args.length>3) {
+              if (!c.isInSameNation(args[3])) return true;
+              if (!c.hasNotGroup(group, args[3])) return true;
+              NationMember.matchMemberByUUID(Bukkit.getPlayer(args[3]).getUniqueId()).addToGroup(group);
+              player.sendMessage(msg.get("nation_group_player_added", true, args[1], args[3]));
+            } else
+              player.sendMessage(msg.get("error_usage", true, "/n rank <rank> promote <player>"));
+            break;
+          case "demote":
+            if (args.length>3) {
+              if (!c.isInSameNation(args[3])) return true;
+              if (!c.hasGroup(group, args[3])) return true;
+              NationMember.matchMemberByUUID(Bukkit.getPlayer(args[3]).getUniqueId()).kickFromGroup(group);
+              player.sendMessage(msg.get("nation_group_player_deleted", true, args[1], args[3]));
+            } else
+              player.sendMessage(msg.get("error_usage", true, "/n rank <rank> demote <player>"));
             break;
           case "priority":
-            //todo
+            if (args.length>3) {
+              if (!c.isInt(args[3])) return true;
+              int priority = Integer.valueOf(args[3]);
+              if (priority>= 0) {
+                group.setPriority(priority);
+                player.sendMessage(msg.get("nation_priority_setted", true, args[1], args[3]));
+              } else {
+                player.sendMessage(msg.get("error_must_be_greater_than", true, "priority", "0"));
+              }
+            } else
+              player.sendMessage(msg.get("error_usage", true, "/n rank <rank> priority <priority>"));
             break;
           case "prefix":
-            //todo
+            if (args.length>3) {
+              group.setPrefix(args[3]);
+              player.sendMessage(msg.get("nation_prefix_setted", true, args[1], args[3]));
+            } else
+              player.sendMessage(msg.get("error_usage", true, "/n rank <rank> prefix <prefix>"));
             break;
           default:
-            sender.sendMessage(msg.get("error_usage", true, "/n rank <rank> <perm/del/promote/prefix/info/priority>"));
+            sender.sendMessage(msg.get("error_usage", true, "/n rank <rank> <perm/del/promote/demote/prefix/info/priority>"));
+            break;
           }
         } else {
           switch (args[1].toLowerCase()) {
@@ -84,11 +174,15 @@ public class NationCommand implements CommandExecutor {
             break;
           case "add":
             if (args.length>2) {
-              Group group = Group.matchGroup(args[2], Nation.getPlayerNation(player));
+              Group group = Group.matchGroup(args[2], Nation.getPlayerNation(player.getUniqueId()));
               if (group == null) {
-                new Group(args[2], Nation.getPlayerNation(player), config);
-                player.sendMessage(msg.get("nation_group_created", true, args[2]));
-                return true;
+                if (!args[2].equalsIgnoreCase("list") && !args[2].equalsIgnoreCase("listall") && !args[2].equalsIgnoreCase("add")) {
+                  new Group(args[2], Nation.getPlayerNation(player.getUniqueId()), config);
+                  player.sendMessage(msg.get("nation_group_created", true, args[2]));
+                  return true;
+                } else {
+                  player.sendMessage(msg.get("error_banned_name", true, args[2]));
+                }
               } else {
                 player.sendMessage(msg.get("error_group_exist", true, args[2]));
               }

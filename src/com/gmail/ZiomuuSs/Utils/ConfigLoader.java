@@ -19,7 +19,7 @@ public class ConfigLoader {
   private Main plugin;
   private HashSet<Nation> nations = new HashSet<>(); //list of all nations
   //options variables
-  public String outlawNation; //name of nation that is always default (if an estate is not belonging to any exiting nation, it belongs to this faction
+  public String NotInNation; //name of nation that is always default (if an estate is not belonging to any exiting nation, it belongs to this faction
   
   public ConfigLoader(Main plugin) {
     this.plugin = plugin;
@@ -31,9 +31,9 @@ public class ConfigLoader {
     loadAll();
   }
   
-  //loading nations
+  //loading all files
   private void loadAll() {
-    outlawNation = config.getString("outlawNation");
+    NotInNation = config.getString("NotInNation");
   }
   
   public void saveNation(Nation nation) {
@@ -58,8 +58,8 @@ public class ConfigLoader {
   }
   
   public void saveGroup(Group group) {
-    new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Groups", group.toString()+".yml").delete();
-    ConfigAccessor ca = new ConfigAccessor(plugin, group.toString()+".yml", "Groups");
+    new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Groups"+String.valueOf(File.separatorChar)+group.getNation().toString(), group.toString()+".yml").delete();
+    ConfigAccessor ca = new ConfigAccessor(plugin, group.toString()+".yml", "Groups"+String.valueOf(File.separatorChar)+group.getNation().toString());
     ConfigurationSection cs = ca.getConfig();
     //todo
   }
@@ -76,5 +76,9 @@ public class ConfigLoader {
     ConfigAccessor ca = new ConfigAccessor(plugin, city.toString()+".yml", "Cities");
     ConfigurationSection cs = ca.getConfig();
     //todo
+  }
+  
+  public void delSavedGroup(Group group) {
+    new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Groups"+String.valueOf(File.separatorChar)+group.getNation().toString(), group.toString()+".yml").delete();
   }
 }
