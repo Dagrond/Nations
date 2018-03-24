@@ -6,6 +6,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.gmail.ZiomuuSs.Nation.Estate;
 import com.gmail.ZiomuuSs.Nation.Group;
 import com.gmail.ZiomuuSs.Nation.Group.NationPermission;
 import com.gmail.ZiomuuSs.Nation.Nation;
@@ -36,13 +37,15 @@ public class NationCommand implements CommandExecutor {
       switch (args[0].toLowerCase()) {
       case "create":
         if (!c.hasPermission("Nations.create", "Nations.*")) return true;
-        if (args.length>2) {
+        if (args.length>3) {
           if (!c.isNotNation(args[1])) return true;
           if (!c.notMemberofNation(args[2])) return true;
-          new Nation(config, args[1], args[2]);
+          if (!c.isEstate(args[3])) return true;
+          if (!c.isFreeEstate(args[3])) return true;
+          new Nation(config, args[1], args[2], Estate.getEstateByName(args[3]));
           sender.sendMessage(msg.get("nation_created", true, args[1], args[2]));
         } else {
-          sender.sendMessage(msg.get("error_usage", true, "/n create <name> <king>"));
+          sender.sendMessage(msg.get("error_usage", true, "/n create <name> <king> <capital>"));
         }
         break;
       case "admin":
@@ -196,9 +199,32 @@ public class NationCommand implements CommandExecutor {
         break;
         }
       case "info":
-        //todo
+        Nation nation = null;
+        if (args.length>1) {
+          if (!c.isNation(args[1])) return true;
+          nation = Nation.getNationByName(args[1]);
+        } else  {
+          if (!c.hasNation()) return true;
+          nation = Nation.getPlayerNation(player.getUniqueId());
+        }
+        player.sendMessage(msg.get("nation_info_name", false, nation.toString()));
+        player.sendMessage(msg.get("nation_info_capital", true, nation.getCapital().toString()));
+        player.sendMessage(msg.get("nation_info_king", false, Bukkit.getOfflinePlayer(nation.getKing()).getName()));
+        player.sendMessage(msg.get("nation_info_members", false, Integer.toString(nation.getMembers().size())));
+        player.sendMessage(msg.get("nation_info_estates", false, Integer.toString(nation.getEstates().size())));
         break;
       case "join":
+        //todo
+        if (args.length>1) {
+          if (!c.isNation(args[1])) return true;
+          if (!c.hasNoNation()) return true;
+          Nation.getNationByName(args[1]).addMember(player);
+          player.sendMessage(msg.get("nation_joined", true, args[1]));
+        } else {
+          player.sendMessage(msg.get("error_usage", true, "/n join <nation>"));
+        }
+        break;
+      case "ban":
         //todo
         break;
       case "list":

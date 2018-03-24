@@ -20,17 +20,34 @@ public class Nation {
   private ConfigLoader config;
   private String name; //name of nation
   private UUID king; //king of nation
+  private Estate capital; //capital of this nation 
   private HashSet<Estate> estates = new HashSet<>(); //estates of this nation
   private HashSet<Group> groups = new HashSet<>(); //all groups created by this faction
-  private Language language; //language of this nation
+  private HashSet<UUID> bannedPlayers = new HashSet<>(); //players who cannot join to this nation
   private HashMap<UUID, NationMember> members = new HashMap<>(); //list of members of that nation, with groups of player
   
   @SuppressWarnings("deprecation")
-  public Nation(ConfigLoader config, String name, String player) {
+  public Nation(ConfigLoader config, String name, String player, Estate capital) {
     this.name = name;
     nations.add(this);
     this.config = config;
+    this.capital = capital;
     king = Bukkit.getOfflinePlayer(player).getUniqueId();
+  }
+  
+  public Nation(ConfigLoader config, String name, UUID uuid, Estate capital) {
+    this.name = name;
+    nations.add(this);
+    this.config = config;
+    this.capital = capital;
+    king = uuid;
+  }
+  
+  public Nation(ConfigLoader config, String name, UUID uuid) {
+    this.name = name;
+    nations.add(this);
+    this.config = config;
+    king = uuid;
   }
   
   public void broadcastToOnlineMembers(String message) {
@@ -43,13 +60,29 @@ public class Nation {
   //setters
   
   public void addMember(Player player) {
-    broadcastToOnlineMembers(msg.get("nation_member_added", true, player.getDisplayName()));
     members.put(player.getUniqueId(), new NationMember(config, player.getUniqueId(), this));
-    player.sendMessage(msg.get("nation_joined", true, name));
+    broadcastToOnlineMembers(msg.get("nation_member_added", true, player.getName()));
+    config.saveNation(this);
+  }
+  
+  public void kickMember(UUID uuid) {
+    NationMember.getMembers().remove(members.get(uuid));
+    config.delNationMember(members.get(uuid));
+    members.remove(uuid);
+    config.saveNation(this);
   }
   
   public void setKing(UUID uuid) {
     this.king = uuid;
+  }
+  
+  public void banPlayer(UUID uuid) {
+    if (isMember(uuid)) kickMember(uuid);
+    bannedPlayers.add(uuid);
+  }
+  
+  public void setCapital(Estate estate) {
+    capital = estate;
   }
   
   //checkers
@@ -73,8 +106,24 @@ public class Nation {
     return name;
   }
   
+  public Estate getCapital() {
+    return capital;
+  }
+  
+  public HashSet<UUID> getBannedPlayers() {
+    return bannedPlayers;
+  }
+  
+  public HashSet<Group> getGroups() {
+    return groups;
+  }
+  
   public UUID getKing() {
     return king;
+  }
+  
+  public HashSet<Estate> getEstates() {
+    return estates;
   }
   
   public static Nation getPlayerNation(UUID uuid) {
@@ -102,5 +151,13 @@ public class Nation {
   
   public static HashSet<Nation> getNations() {
     return nations;
+  }
+  
+  public static Nation getNationByName(String name) {
+    for (Nation nation : nations) {
+      if (nation.toString().equalsIgnoreCase(name))
+        return nation;
+    }
+    return null;
   }
 }

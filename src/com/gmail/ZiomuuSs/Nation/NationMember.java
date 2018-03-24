@@ -16,13 +16,14 @@ public class NationMember {
   private Nation nation; //nation of this player
   private ConfigLoader config;
   private HashSet<Group> groups = new HashSet<>(); //groups that player is into
-  private HashSet<Language> languages = new HashSet<>(); //languages that player knows and what level of knowing this language (0 - not at all, 1 - beginner, 2 - advanced, 3 - native)
+  private HashMap<String, Integer> languages = new HashMap<>(); //languages that player knows and what level of knowing this language (0 - not at all, 1 - beginner, 2 - advanced, 3 - native)
   
   public NationMember(ConfigLoader config, UUID uuid, Nation nation) {
     this.player = uuid;
     this.nation = nation;
     this.config = config;
     members.put(uuid, this);
+    config.saveNationMember(this);
   }
   
   public boolean hasPermission (NationPermission perm) {
@@ -53,6 +54,10 @@ public class NationMember {
   
   public UUID getUUID() {
     return player;
+  }
+  
+  public HashMap<String, Integer> getLanguages() {
+    return languages;
   }
   
   public Nation getNation() {

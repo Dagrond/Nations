@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import com.gmail.ZiomuuSs.Nation.Estate;
 import com.gmail.ZiomuuSs.Nation.Group;
 import com.gmail.ZiomuuSs.Nation.Group.NationPermission;
 import com.gmail.ZiomuuSs.Nation.Nation;
@@ -25,6 +26,33 @@ public class Condition {
       return false;
     } else {
       return true;
+    }
+  }
+  
+  public boolean hasNoNation() {
+    if (Nation.getPlayerNation(player.getUniqueId()) != null) {
+      player.sendMessage(msg.get("error_already_in_nation", true));
+      return false;
+    } else {
+      return true;
+    }
+  }
+  
+  public boolean isFreeEstate(String name) {
+    if (Estate.getEstateByName(name).getNation() == null)
+      return true;
+    else {
+      player.sendMessage(msg.get("error_estate_not_free", true, name));
+      return false;
+    }
+  }
+  
+  public boolean isEstate(String name) {
+    if (Estate.getEstateByName(name) != null) 
+      return true;
+    else {
+      player.sendMessage(msg.get("estate_estate_not_exist", true, name));
+      return false;
     }
   }
   
