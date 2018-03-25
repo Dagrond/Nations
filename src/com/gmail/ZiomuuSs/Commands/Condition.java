@@ -51,7 +51,7 @@ public class Condition {
     if (Estate.getEstateByName(name) != null) 
       return true;
     else {
-      player.sendMessage(msg.get("estate_estate_not_exist", true, name));
+      player.sendMessage(msg.get("error_estate_estate_not_exist", true, name));
       return false;
     }
   }
@@ -184,6 +184,24 @@ public class Condition {
     } catch (Exception e) {
       return false;
     }
+  }
+  
+  public boolean isBannedFromNation(Nation nation) {
+    if (nation.getBannedPlayers().contains(player.getUniqueId())) {
+      player.sendMessage(msg.get("error_banned_in_nation", true, nation.toString()));
+      return true;
+    }
+    return false;
+  }
+  
+  public boolean checkIfCanJoin(Nation nation) {
+    for (Nation n : Nation.getNations()) {
+      if (n.getMembers().size() >= nation.getMembers().size()+5) {
+        player.sendMessage(msg.get("error_nation_balance", true, nation.toString()));
+        return false;
+      }
+    }
+    return true;
   }
   
   public boolean isPermission(String perm) {

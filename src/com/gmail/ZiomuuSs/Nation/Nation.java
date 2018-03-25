@@ -43,13 +43,6 @@ public class Nation {
     king = uuid;
   }
   
-  public Nation(ConfigLoader config, String name, UUID uuid) {
-    this.name = name;
-    nations.add(this);
-    this.config = config;
-    king = uuid;
-  }
-  
   public void broadcastToOnlineMembers(String message) {
     for (Player player : Bukkit.getOnlinePlayers()) {
       if (isMember(player.getUniqueId()))
@@ -74,6 +67,7 @@ public class Nation {
   
   public void setKing(UUID uuid) {
     this.king = uuid;
+    members.put(uuid, new NationMember(config, uuid, this));
   }
   
   public void banPlayer(UUID uuid) {

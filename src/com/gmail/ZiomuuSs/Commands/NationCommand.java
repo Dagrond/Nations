@@ -33,24 +33,36 @@ public class NationCommand implements CommandExecutor {
         return true;
       }
       Condition c = new Condition(player);
-      if (args.length<1) sender.sendMessage(msg.get("error_usage", true, "/n help"));
+      if (args.length<1) {
+        sender.sendMessage(msg.get("error_usage", true, "/n help"));
+        return true;
+      }
       switch (args[0].toLowerCase()) {
-      case "create":
-        if (!c.hasPermission("Nations.create", "Nations.*")) return true;
-        if (args.length>3) {
-          if (!c.isNotNation(args[1])) return true;
-          if (!c.notMemberofNation(args[2])) return true;
-          if (!c.isEstate(args[3])) return true;
-          if (!c.isFreeEstate(args[3])) return true;
-          new Nation(config, args[1], args[2], Estate.getEstateByName(args[3]));
-          sender.sendMessage(msg.get("nation_created", true, args[1], args[2]));
-        } else {
-          sender.sendMessage(msg.get("error_usage", true, "/n create <name> <king> <capital>"));
-        }
-        break;
       case "admin":
         //todo
         if (!c.hasPermission("Nations.admin", "Nations.*")) return true;
+        if (args.length>1) {
+          switch (args[1]) {
+          case "create":
+            if (!c.hasPermission("Nations.create", "Nations.*")) return true;
+            if (args.length>4) {
+              if (!c.isNotNation(args[2])) return true;
+              if (!c.notMemberofNation(args[3])) return true;
+              if (!c.isEstate(args[4])) return true;
+              if (!c.isFreeEstate(args[4])) return true;
+              new Nation(config, args[2], args[3], Estate.getEstateByName(args[4]));
+              sender.sendMessage(msg.get("nation_created", true, args[2], args[3]));
+            } else {
+              sender.sendMessage(msg.get("error_usage", true, "/n admin create <name> <king> <capital>"));
+            }
+            break;
+          default:
+            player.sendMessage(msg.get("error_usage", true, "/n admin <create>"));
+            break;
+          }
+        } else {
+          player.sendMessage(msg.get("error_usage", true, "/n admin <create>"));
+        }
         break;
       case "rank":
         if (!c.hasNation()) return true;
@@ -214,11 +226,13 @@ public class NationCommand implements CommandExecutor {
         player.sendMessage(msg.get("nation_info_estates", false, Integer.toString(nation.getEstates().size())));
         break;
       case "join":
-        //todo
         if (args.length>1) {
           if (!c.isNation(args[1])) return true;
           if (!c.hasNoNation()) return true;
-          Nation.getNationByName(args[1]).addMember(player);
+          Nation n = Nation.getNationByName(args[1]);
+          if (!c.checkIfCanJoin(n)) return true;
+          if (c.isBannedFromNation(n)) return true;
+          n.addMember(player);
           player.sendMessage(msg.get("nation_joined", true, args[1]));
         } else {
           player.sendMessage(msg.get("error_usage", true, "/n join <nation>"));
@@ -237,8 +251,5 @@ public class NationCommand implements CommandExecutor {
     }
   return true;
   }
-  
-  
-  
   
 }

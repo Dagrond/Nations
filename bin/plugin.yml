@@ -1,7 +1,7 @@
 name: Nations
-main: com.gmail.ZiomuuSs.Main
-version: 0.4
-softdepend: [AdminTools]
+main: com.gmail.ZiomuuSs.NationPlugin
+version: 0.1
+softdepend: [AdminTools, Multiverse-Core]
 depend: [WorldGuard]
 commands:
    Nation:

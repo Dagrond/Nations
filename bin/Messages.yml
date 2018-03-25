@@ -13,6 +13,7 @@ error_variable_color: "&4&l"
 #You can also use standard minecraft colors (&1, &2, &c, etc.), but it's better to use colors section (so you don't have to edit all messages when you want to change colors)
 
 #messages
+console_loaded: "Pomyslnie zaladowano %1 panstw, %2 prowincji, %3 grup i %4 graczy!"
 nation_member_added: "Gracz %1 dolaczyl do Twojego panstwa!"
 nation_created: "Pomyslnie utworzyles frakcje %1 z graczem %2 jako generalem!"
 nation_joined: "Pomyslnie dolaczyles do panstwa %1!"
@@ -54,8 +55,10 @@ error_in_group: "Gracz %1 jest juz w grupie %2!"
 error_not_a_number: "%1 nie jest liczba calkowita!"
 error_must_be_greater_or_equal_to: "%1 musi byc wieksze lub rowne %2!"
 error_already_in_nation: "Jestes juz czlonkiem panstwa!"
-estate_estate_not_exist: "Prowincja o nazwie %1 nie istnieje!"
+error_estate_estate_not_exist: "Prowincja o nazwie %1 nie istnieje!"
 error_estate_not_free: "Prowincja %1 nalezy juz do jakiegos panstwa!"
+error_nation_balance: "Nie mozesz dolaczyc do panstwa %1 poniewaz ma ono zbyt wiele czlonkow!"
+error_banned_in_nation: "Nie mozesz dolaczyc do panstwa %1 poniewaz zostales zbanowany!"
 
 #help pages
 
