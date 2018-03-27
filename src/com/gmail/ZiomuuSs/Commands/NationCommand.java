@@ -13,6 +13,7 @@ import com.gmail.ZiomuuSs.Nation.Nation;
 import com.gmail.ZiomuuSs.Nation.NationMember;
 import com.gmail.ZiomuuSs.Utils.ConfigLoader;
 import com.gmail.ZiomuuSs.Utils.msg;
+import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 
 
 public class NationCommand implements CommandExecutor {
@@ -32,14 +33,13 @@ public class NationCommand implements CommandExecutor {
         sender.sendMessage(msg.get("error_player_needed", true));
         return true;
       }
-      Condition c = new Condition(player);
+      Condition c = new Condition(player, config);
       if (args.length<1) {
         sender.sendMessage(msg.get("error_usage", true, "/n help"));
         return true;
       }
       switch (args[0].toLowerCase()) {
       case "admin":
-        //todo
         if (!c.hasPermission("Nations.admin", "Nations.*")) return true;
         if (args.length>1) {
           switch (args[1]) {
@@ -56,12 +56,80 @@ public class NationCommand implements CommandExecutor {
               sender.sendMessage(msg.get("error_usage", true, "/n admin create <name> <king> <capital>"));
             }
             break;
+          case "color":
+            if (args.length>3) {
+              if (!c.isNation(args[2])) return true;
+              if (!c.isHex(args[3])) return true;
+              Nation.getNationByName(args[2]).setColor(Integer.parseInt(args[3].substring(1), 16));
+              player.sendMessage(msg.get("nation_color_setted", true, args[2], args[3])); //todo: save color to file and load it
+            } else {
+              player.sendMessage(msg.get("error_usage", true, "/n admin color <nation> <color>"));
+            }
+            break;
+          case "estate":
+            if (args.length>2) {
+              switch (args[2].toLowerCase()) {
+              case "add":
+                if (args.length>4) {
+                  if (!c.isNotEstate(args[3])) return true;
+                  if (!c.isPolygonalRegion(args[4], player.getWorld())) return true;
+                  ProtectedPolygonalRegion region = (ProtectedPolygonalRegion) config.getWorldGuard().getRegionManager(player.getWorld()).getRegion(args[4]);
+                  if (c.isAlreadyInEstate(region, player.getWorld())) return true;
+                  new Estate(args[3], region, player.getWorld(), config);
+                  player.sendMessage(msg.get("estate_added", true, args[3]));
+                } else {
+                  player.sendMessage(msg.get("error_usage", true, "/n admin estate add <name> <region>"));
+                }
+                break;
+              case "del":
+                if (args.length>3) {
+                  if (!c.isEstate(args[3])) return true;
+                  Estate est = Estate.getEstateByName(args[3]);
+                  if (!c.isNotCapital(est)) return true;
+                  est.del();
+                  player.sendMessage(msg.get("estate_removed", true, args[3]));
+                } else {
+                  player.sendMessage(msg.get("error_usage", true, "/n admin estate del <name>"));
+                }
+                break;
+              case "list":
+                String list = "";
+                for (Estate estate : Estate.getEstates()) {
+                  list+= estate.toString()+", ";
+                }
+                if (!list.equalsIgnoreCase(""))
+                  list = list.substring(0, list.length() - 2);
+                else
+                  list = msg.get("none", false);
+                player.sendMessage(msg.get("estate_list", true, list));
+                break;
+              case "info":
+                if (args.length>3) {
+                  if (!c.isEstate(args[3])) return true;
+                  Estate e = Estate.getEstateByName(args[3]);
+                  player.sendMessage(msg.get("estate_info_name", true, e.toString()));
+                  player.sendMessage(msg.get("estate_info_nation", true, e.getNation() == null ? msg.get("not_assigned", false) : e.getNation().toString()));
+                } else {
+                  player.sendMessage(msg.get("error_usage", true, "/n admin estate info <name>"));
+                }
+                break;
+              default:
+                player.sendMessage(msg.get("error_usage", true, "/n admin estate add/del/list/info"));
+                break;
+              }
+            } else {
+              player.sendMessage(msg.get("error_usage", true, "/n admin estate add/del/list/info"));
+            }
+            break;
+          case "reload":
+            config.getMain().reload(sender);
+            break;
           default:
-            player.sendMessage(msg.get("error_usage", true, "/n admin <create>"));
+            player.sendMessage(msg.get("error_usage", true, "/n admin <create/estate/reload>"));
             break;
           }
         } else {
-          player.sendMessage(msg.get("error_usage", true, "/n admin <create>"));
+          player.sendMessage(msg.get("error_usage", true, "/n admin <create/estate/reload>"));
         }
         break;
       case "rank":
@@ -219,8 +287,8 @@ public class NationCommand implements CommandExecutor {
           if (!c.hasNation()) return true;
           nation = Nation.getPlayerNation(player.getUniqueId());
         }
-        player.sendMessage(msg.get("nation_info_name", false, nation.toString()));
-        player.sendMessage(msg.get("nation_info_capital", true, nation.getCapital().toString()));
+        player.sendMessage(msg.get("nation_info_name", true, nation.toString()));
+        player.sendMessage(msg.get("nation_info_capital", false, nation.getCapital().toString()));
         player.sendMessage(msg.get("nation_info_king", false, Bukkit.getOfflinePlayer(nation.getKing()).getName()));
         player.sendMessage(msg.get("nation_info_members", false, Integer.toString(nation.getMembers().size())));
         player.sendMessage(msg.get("nation_info_estates", false, Integer.toString(nation.getEstates().size())));

@@ -4,5 +4,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="C:/Users/Ziomu/Desktop/Java/Libraries/spigot-api-1.12-R0.1-SNAPSHOT-shaded-b1349.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Ziomu/Desktop/Java/Libraries/worldguard-6.2.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Ziomu/Desktop/Java/Libraries/dynmap-2.5.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Ziomu/Desktop/Java/Libraries/worldedit-bukkit-6.1.7.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

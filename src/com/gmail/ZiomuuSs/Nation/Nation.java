@@ -23,6 +23,7 @@ public class Nation {
   private Estate capital; //capital of this nation 
   private HashSet<Estate> estates = new HashSet<>(); //estates of this nation
   private HashSet<Group> groups = new HashSet<>(); //all groups created by this faction
+  private int color = 0xFF0000; //default color on dynmap
   private HashSet<UUID> bannedPlayers = new HashSet<>(); //players who cannot join to this nation
   private HashMap<UUID, NationMember> members = new HashMap<>(); //list of members of that nation, with groups of player
   
@@ -32,15 +33,24 @@ public class Nation {
     nations.add(this);
     this.config = config;
     this.capital = capital;
-    king = Bukkit.getOfflinePlayer(player).getUniqueId();
+    capital.setNation(this);
+    estates.add(capital);
+    UUID uuid = Bukkit.getOfflinePlayer(player).getUniqueId();
+    king = uuid;
+    members.put(uuid, new NationMember(config, uuid, this));
+    config.saveNation(this);
   }
   
   public Nation(ConfigLoader config, String name, UUID uuid, Estate capital) {
     this.name = name;
     nations.add(this);
     this.config = config;
+    capital.setNation(this);
     this.capital = capital;
+    estates.add(capital);
     king = uuid;
+    members.put(uuid, new NationMember(config, uuid, this));
+    config.saveNation(this);
   }
   
   public void broadcastToOnlineMembers(String message) {
@@ -65,18 +75,26 @@ public class Nation {
     config.saveNation(this);
   }
   
+  public void setColor(int color) {
+    this.color = color;
+  }
+  
   public void setKing(UUID uuid) {
     this.king = uuid;
-    members.put(uuid, new NationMember(config, uuid, this));
+    if (!members.containsKey(uuid)) members.put(uuid, new NationMember(config, uuid, this));
+    config.saveNation(this);
   }
   
   public void banPlayer(UUID uuid) {
     if (isMember(uuid)) kickMember(uuid);
     bannedPlayers.add(uuid);
+    config.saveNation(this);
   }
   
   public void setCapital(Estate estate) {
     capital = estate;
+    if (!estates.contains(estate)) estates.add(estate);
+    config.saveNation(this);
   }
   
   //checkers
@@ -98,6 +116,10 @@ public class Nation {
   @Override
   public String toString() {
     return name;
+  }
+  
+  public int getColor() {
+    return color;
   }
   
   public Estate getCapital() {

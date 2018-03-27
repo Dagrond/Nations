@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import com.gmail.ZiomuuSs.Nation.Estate;
@@ -11,13 +12,19 @@ import com.gmail.ZiomuuSs.Nation.Group;
 import com.gmail.ZiomuuSs.Nation.Group.NationPermission;
 import com.gmail.ZiomuuSs.Nation.Nation;
 import com.gmail.ZiomuuSs.Nation.NationMember;
+import com.gmail.ZiomuuSs.Utils.ConfigLoader;
+import com.gmail.ZiomuuSs.Utils.HexValidator;
 import com.gmail.ZiomuuSs.Utils.msg;
+import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 public class Condition {
   private Player player;
+  private ConfigLoader config;
   
-  public Condition(Player player) {
+  public Condition(Player player, ConfigLoader config) {
     this.player = player;
+    this.config = config;
   }
   
   public boolean hasNation() {
@@ -52,6 +59,54 @@ public class Condition {
       return true;
     else {
       player.sendMessage(msg.get("error_estate_estate_not_exist", true, name));
+      return false;
+    }
+  }
+  
+  public boolean isAlreadyInEstate(ProtectedPolygonalRegion region, World world) {
+    for (Estate estate : Estate.getEstates()) {
+      if (estate.getRegion().equals(region) && estate.getRegionWorld().equals(world)) {
+        player.sendMessage(msg.get("error_region_already_in_use", true, region.getId()));
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  public boolean isNotCapital(Estate e) {
+    if (e.getNation() != null) {
+      if (e.getNation().getCapital().equals(e)) {
+        player.sendMessage(msg.get("error_estate_is_capital", true, e.toString(), e.getNation().toString()));
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  public boolean isHex(String c) {
+    HexValidator x = new HexValidator();
+    if (x.validate(c)) {
+      return true;
+    }
+    player.sendMessage(msg.get("error_not_hex", true, c));
+    return false;
+  }
+  
+  public boolean isPolygonalRegion(String name, World world) {
+    ProtectedRegion region = config.getWorldGuard().getRegionManager(world).getRegion(name);
+    if (region != null && region instanceof ProtectedPolygonalRegion) {
+      return true;
+    } else {
+      player.sendMessage(msg.get("error_not_poly_region", true, name));
+      return false;
+    }
+  }
+  
+  public boolean isNotEstate(String name) {
+    if (Estate.getEstateByName(name) == null) 
+      return true;
+    else {
+      player.sendMessage(msg.get("error_estate_estate_exist", true, name));
       return false;
     }
   }
@@ -229,14 +284,15 @@ public class Condition {
     OfflinePlayer player = Bukkit.getOfflinePlayer(name);
     if (player.hasPlayedBefore()) {
       for(NationMember member : NationMember.getMembers()) {
-        if (member.getUUID().equals(player.getUniqueId()))
+        if (member.getUUID().equals(player.getUniqueId())) {
+          this.player.sendMessage(msg.get("error_player_in_nation", true, name));
           return false;
+        }
       }
     } else {
       this.player.sendMessage(msg.get("error_player_not_exist", true, name));
-      return true;
+      return false;
     }
-    this.player.sendMessage(msg.get("error_player_in_nation", true, name));
     return true;
   }
   
