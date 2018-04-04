@@ -1,10 +1,10 @@
-package com.gmail.ZiomuuSs.Nation;
+package com.github.Dagrond.Nation;
 
 import java.util.HashSet;
 
 import org.bukkit.ChatColor;
 
-import com.gmail.ZiomuuSs.Utils.ConfigLoader;
+import com.github.Dagrond.Utils.ConfigLoader;
 
 /*
  * Group class

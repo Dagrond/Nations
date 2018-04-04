@@ -1,4 +1,4 @@
-package com.gmail.ZiomuuSs.Commands;
+package com.github.Dagrond.Commands;
 
 import java.util.UUID;
 
@@ -7,14 +7,14 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
-import com.gmail.ZiomuuSs.Nation.Estate;
-import com.gmail.ZiomuuSs.Nation.Group;
-import com.gmail.ZiomuuSs.Nation.Group.NationPermission;
-import com.gmail.ZiomuuSs.Nation.Nation;
-import com.gmail.ZiomuuSs.Nation.NationMember;
-import com.gmail.ZiomuuSs.Utils.ConfigLoader;
-import com.gmail.ZiomuuSs.Utils.HexValidator;
-import com.gmail.ZiomuuSs.Utils.msg;
+import com.github.Dagrond.Nation.Estate;
+import com.github.Dagrond.Nation.Group;
+import com.github.Dagrond.Nation.Nation;
+import com.github.Dagrond.Nation.NationMember;
+import com.github.Dagrond.Nation.Group.NationPermission;
+import com.github.Dagrond.Utils.ConfigLoader;
+import com.github.Dagrond.Utils.HexValidator;
+import com.github.Dagrond.Utils.msg;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 

@@ -1,18 +1,22 @@
-package com.gmail.ZiomuuSs;
+package com.github.Dagrond;
 
 import org.bukkit.command.CommandSender;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dynmap.DynmapAPI;
 
-import com.gmail.ZiomuuSs.Commands.NationCommand;
-import com.gmail.ZiomuuSs.Nation.Estate;
-import com.gmail.ZiomuuSs.Nation.Group;
-import com.gmail.ZiomuuSs.Nation.Nation;
-import com.gmail.ZiomuuSs.Nation.NationMember;
+import com.github.Dagrond.Commands.NationCommand;
+import com.github.Dagrond.Events.OnDeathEvent;
+import com.github.Dagrond.Events.RespawnEvent;
+import com.github.Dagrond.Events.onAsyncPlayerChatEvent;
+import com.github.Dagrond.Nation.Estate;
+import com.github.Dagrond.Nation.Group;
+import com.github.Dagrond.Nation.Nation;
+import com.github.Dagrond.Nation.NationMember;
+import com.github.Dagrond.Utils.ConfigLoader;
+import com.github.Dagrond.Utils.msg;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import com.gmail.ZiomuuSs.Utils.ConfigLoader;
-import com.gmail.ZiomuuSs.Utils.msg;
 
 public final class NationPlugin extends JavaPlugin {
   private ConfigLoader config;
@@ -29,6 +33,10 @@ public final class NationPlugin extends JavaPlugin {
   
   public void reload(CommandSender sender) {
     //clear old data
+    HandlerList.unregisterAll(this);
+    getServer().getPluginManager().registerEvents(new onAsyncPlayerChatEvent(), this);
+    getServer().getPluginManager().registerEvents(new OnDeathEvent(), this);
+    getServer().getPluginManager().registerEvents(new RespawnEvent(), this);
     Estate.getEstates().clear();
     Nation.getNations().clear();
     NationMember.getMembers().clear();

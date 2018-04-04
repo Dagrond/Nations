@@ -1,4 +1,4 @@
-package com.gmail.ZiomuuSs.Nation;
+package com.github.Dagrond.Nation;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,8 +7,8 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 
-import com.gmail.ZiomuuSs.Nation.Group.NationPermission;
-import com.gmail.ZiomuuSs.Utils.ConfigLoader;
+import com.github.Dagrond.Nation.Group.NationPermission;
+import com.github.Dagrond.Utils.ConfigLoader;
 
 public class NationMember {
   private static HashMap<UUID, NationMember> members = new HashMap<>(); //set of all nation members

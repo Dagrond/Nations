@@ -1,5 +1,5 @@
 name: Nations
-main: com.gmail.ZiomuuSs.NationPlugin
+main: com.github.Dagrond.NationPlugin
 version: 0.1
 softdepend: [AdminTools, Multiverse-Core]
 depend: [WorldGuard]

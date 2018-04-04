@@ -1,4 +1,4 @@
-package com.gmail.ZiomuuSs.Utils;
+package com.github.Dagrond.Utils;
 
 import java.io.File;
 import java.io.IOException;

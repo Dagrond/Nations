@@ -1,4 +1,4 @@
-package com.gmail.ZiomuuSs.Utils;
+package com.github.Dagrond.Utils;
 
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
@@ -26,6 +26,8 @@ public class msg {
           string = string.replaceAll("%"+(i+1), msg.getString("error_variable_color")+opt[i]+msg.getString("error_color"));
         }
       }
+    } else if(path.startsWith("raw_")) {
+      string = msg.getString(path);
     } else {
       string += msg.getString("message_color")+msg.getString(path);
       string = string.replaceAll("%s", msg.getString("message_variable_color"));

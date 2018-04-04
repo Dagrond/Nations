@@ -1,4 +1,4 @@
-package com.gmail.ZiomuuSs.Utils;
+package com.github.Dagrond.Utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

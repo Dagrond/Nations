@@ -1,4 +1,4 @@
-package com.gmail.ZiomuuSs.Utils;
+package com.github.Dagrond.Utils;
 
 import java.io.File;
 import java.util.HashSet;
@@ -6,20 +6,20 @@ import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import com.gmail.ZiomuuSs.NationPlugin;
-import com.gmail.ZiomuuSs.Nation.Estate;
-import com.gmail.ZiomuuSs.Nation.Group;
-import com.gmail.ZiomuuSs.Nation.Nation;
-import com.gmail.ZiomuuSs.Nation.NationMember;
+import com.github.Dagrond.NationPlugin;
+import com.github.Dagrond.Nation.Estate;
+import com.github.Dagrond.Nation.Group;
+import com.github.Dagrond.Nation.Nation;
+import com.github.Dagrond.Nation.NationMember;
+import com.github.Dagrond.Nation.Group.NationPermission;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
-
-import com.gmail.ZiomuuSs.Nation.Group.NationPermission;
 
 public class ConfigLoader {
   private ConfigAccessor msgAccessor;
@@ -61,7 +61,7 @@ public class ConfigLoader {
         if (world != null) {
           rg = (ProtectedPolygonalRegion) worldGuard.getRegionManager(world).getRegion(cs.getString("Region"));
           if (rg != null) {
-            new Estate(name, rg, world, this);
+            new Estate(name, rg, world, this, new Location(Bukkit.getWorld(cs.getString("Spawn.World")), cs.getDouble("Spawn.X"), cs.getDouble("Spawn.Y"), cs.getDouble("Spawn.Z"), (float) cs.getDouble("Spawn.Yaw"), (float) cs.getDouble("Spawn.Pitch")));
             ++loadedEstates;
           }
         }
@@ -75,6 +75,7 @@ public class ConfigLoader {
         name = name.substring(0, name.length() - 4); //remove the .yml
         Nation nation = new Nation(this, name, UUID.fromString(cs.getString("King")), Estate.getEstateByName(cs.getString("Capital")));
         ++loadedNations;
+        nation.setColor(Integer.parseInt(cs.getString("Color").substring(1), 16));
         if (cs.isList("BannedPlayers")) {
           for (String uuid : (List<String>) cs.getList("BannedPlayers")) {
             nation.getBannedPlayers().add(UUID.fromString(uuid));
@@ -119,6 +120,7 @@ public class ConfigLoader {
       }
     }
     isLoading = false;
+    new DynmapUpdater(plugin);
     Bukkit.getLogger().info(msg.get("console_loaded", true, Integer.toString(loadedNations), Integer.toString(loadedEstates), Integer.toString(loadedGroups), Integer.toString(loadedMembers)));
   }
   
@@ -130,6 +132,7 @@ public class ConfigLoader {
       cs.set("Name", nation.toString());
       cs.set("King", nation.getKing().toString());
       cs.set("Capital", nation.getCapital().toString());
+      cs.set("Color", "#"+Integer.toHexString(nation.getColor()));
       HashSet<String> estates = new HashSet<>();
       for (Estate estate : nation.getEstates()) {
         estates.add(estate.toString());
@@ -203,6 +206,12 @@ public class ConfigLoader {
       ConfigurationSection cs = ca.getConfig();
       cs.set("Region", estate.getRegion().getId());
       cs.set("RegionWorld", estate.getRegionWorld().getName());
+      cs.set("Spawn.World", estate.getSpawn().getWorld().getName());
+      cs.set("Spawn.X", estate.getSpawn().getX());
+      cs.set("Spawn.Y", estate.getSpawn().getY());
+      cs.set("Spawn.Z", estate.getSpawn().getZ());
+      cs.set("Spawn.Yaw", estate.getSpawn().getYaw());
+      cs.set("Spawn.Pitch", estate.getSpawn().getPitch());
       ca.saveConfig();
     }
   }

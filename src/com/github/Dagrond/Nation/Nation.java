@@ -1,4 +1,4 @@
-package com.gmail.ZiomuuSs.Nation;
+package com.github.Dagrond.Nation;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,8 +7,9 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import com.gmail.ZiomuuSs.Utils.ConfigLoader;
-import com.gmail.ZiomuuSs.Utils.msg;
+import com.github.Dagrond.Utils.ConfigLoader;
+import com.github.Dagrond.Utils.DynmapUpdater;
+import com.github.Dagrond.Utils.msg;
 
 /*
  *  Nation class
@@ -68,6 +69,16 @@ public class Nation {
     config.saveNation(this);
   }
   
+  public void removeEstate(Estate e) {
+    estates.remove(e);
+    config.saveNation(this);
+  }
+  
+  public void addEstate(Estate e) {
+    estates.add(e);
+    config.saveNation(this);
+  }
+  
   public void kickMember(UUID uuid) {
     NationMember.getMembers().remove(members.get(uuid));
     config.delNationMember(members.get(uuid));
@@ -77,6 +88,8 @@ public class Nation {
   
   public void setColor(int color) {
     this.color = color;
+    new DynmapUpdater(config.getMain());
+    config.saveNation(this);
   }
   
   public void setKing(UUID uuid) {
