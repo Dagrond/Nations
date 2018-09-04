@@ -1,55 +1,49 @@
 package com.github.Dagrond.Utils;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 import com.github.Dagrond.NationPlugin;
 import com.github.Dagrond.Nation.Estate;
-import com.github.Dagrond.Nation.Group;
 import com.github.Dagrond.Nation.Nation;
 import com.github.Dagrond.Nation.NationMember;
-import com.github.Dagrond.Nation.Group.NationPermission;
+import com.github.Dagrond.Nation.NationMember.NationPerm;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 
 public class ConfigLoader {
   private ConfigAccessor msgAccessor;
-  private ConfigurationSection config;
   private WorldGuardPlugin worldGuard;
   private NationPlugin plugin;
-  private boolean isLoading = false; //describes if plugin is loading files (to block saving during loading)
+  private boolean isLoading = false; //describes if plugin is loading files to block saving during first loading (well, thats complicated)
   //options variables
-  public String NotInNation; //name of nation that is always default (if an estate is not belonging to any exiting nation, it belongs to this faction
   
   public ConfigLoader(NationPlugin plugin, WorldGuardPlugin worldGuard) {
     this.plugin = plugin;
     this.worldGuard = worldGuard;
-    plugin.saveDefaultConfig();
     msgAccessor = new ConfigAccessor(plugin, "Messages.yml");
     msgAccessor.saveDefaultConfig();
     msg.set(msgAccessor.getConfig());
-    config = plugin.getConfig();
     loadAll();
   }
   
   //loading all files
-  @SuppressWarnings("unchecked")
   private void loadAll() {
     isLoading = true;
-    NotInNation = config.getString("NotInNation");
     int loadedNations = 0;
     int loadedEstates = 0;
-    int loadedGroups = 0;
     int loadedMembers = 0;
+    
     //loading estates
     if (new File(plugin.getDataFolder().getAbsolutePath() + File.separatorChar + "Estates").exists()) {
       for (File file : new File(plugin.getDataFolder().getAbsolutePath() + File.separatorChar + "Estates").listFiles()) {
@@ -57,13 +51,20 @@ public class ConfigLoader {
         String name = file.getName();
         name = name.substring(0, name.length() - 4); //remove the .yml
         ProtectedPolygonalRegion rg;
-        World world = Bukkit.getWorld(cs.getString("RegionWorld"));
+        World world = Bukkit.getWorld(cs.getString("spawn.world"));
         if (world != null) {
-          rg = (ProtectedPolygonalRegion) worldGuard.getRegionManager(world).getRegion(cs.getString("Region"));
+          rg = (ProtectedPolygonalRegion) worldGuard.getRegionManager(world).getRegion(cs.getString("region"));
           if (rg != null) {
-            new Estate(name, rg, world, this, new Location(Bukkit.getWorld(cs.getString("Spawn.World")), cs.getDouble("Spawn.X"), cs.getDouble("Spawn.Y"), cs.getDouble("Spawn.Z"), (float) cs.getDouble("Spawn.Yaw"), (float) cs.getDouble("Spawn.Pitch")));
+            Estate e = new Estate(name, new Location(world, cs.getDouble("spawn.x"), cs.getDouble("spawn.y"), cs.getDouble("spawn.z"), (float) cs.getDouble("spawn.yaw"), (float) cs.getDouble("spawn.pitch")), rg, this);
+            if (cs.isList("description"))
+              for (String lore : cs.getStringList("description"))
+                e.addLore(lore);
             ++loadedEstates;
+          } else {
+            Bukkit.getLogger().info(msg.get("error_console_no_region", true, name, cs.getString("region"), cs.getString("spawn.world")));
           }
+        } else {
+          Bukkit.getLogger().info(msg.get("error_console_no_world", true, name, cs.getString("spawn.world")));
         }
       }
     }
@@ -73,90 +74,113 @@ public class ConfigLoader {
         FileConfiguration cs = YamlConfiguration.loadConfiguration(file);
         String name = file.getName();
         name = name.substring(0, name.length() - 4); //remove the .yml
-        Nation nation = new Nation(this, name, UUID.fromString(cs.getString("King")), Estate.getEstateByName(cs.getString("Capital")));
+        Nation nation = new Nation(name, this);
+        nation.setHEXColor(Integer.parseInt(cs.getString("hexolor").substring(1), 16));
+        nation.setMCcolor(ChatColor.valueOf(cs.getString("mcolor")));
+        if (cs.isList("bannedplayers")) {
+          for (String uuid : cs.getStringList("bannedplayers")) {
+            nation.addBannedPlayer(UUID.fromString(uuid));
+          }
+        }
+        if (cs.isList("estates")) {
+          String capital = "";
+          if (cs.isString("capital")) {
+            capital = cs.getString("capital");
+          } else {
+            Bukkit.getLogger().info(msg.get("error_console_nation_without_capital", true, name));
+          }
+          for (String estate : cs.getStringList("estates")) {
+            Estate e = Estate.getEstate(estate);
+            if (e != null) {
+              nation.addEstate(e);
+              e.setNation(nation);
+              if (capital.equals(estate))
+                nation.setCapital(e);
+            } else {
+              Bukkit.getLogger().info(msg.get("error_console_estate_not_loaded", true, estate, name));
+            }
+          }
+        }
+        if (cs.isString("king"))
+          nation.setKing(UUID.fromString(cs.getString("king")));
+        else
+          Bukkit.getLogger().info(msg.get("error_console_nation_without_king", true, name));
+        if (cs.isList("assistants"))
+          for (String assistant : cs.getStringList("assistants"))
+            nation.addAssistant(UUID.fromString(assistant));
+        if (cs.isList("members"))
+          for (String member : cs.getStringList("members"))
+            nation.addMember(UUID.fromString(member));
         ++loadedNations;
-        nation.setColor(Integer.parseInt(cs.getString("Color").substring(1), 16));
-        if (cs.isList("BannedPlayers")) {
-          for (String uuid : (List<String>) cs.getList("BannedPlayers")) {
-            nation.getBannedPlayers().add(UUID.fromString(uuid));
-          }
-        }
-        if (cs.isList("Estates")) {
-          for (String estate : (List<String>) cs.getList("Estates")) {
-            nation.getEstates().add(Estate.getEstateByName(estate));
-          }
-        }
-        //loading nation groups
-        if (new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Groups"+String.valueOf(File.separatorChar)+nation.toString()).exists()) {
-          for (File f : new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Groups"+String.valueOf(File.separatorChar)+nation.toString()).listFiles()) {
-            FileConfiguration fc = YamlConfiguration.loadConfiguration(f);
-            String groupName = f.getName();
-            groupName = groupName.substring(0, groupName.length() - 4); //remove the .yml
-            Group group = new Group(groupName, nation, this);
-            ++loadedGroups;
-            nation.getGroups().add(group);
-            group.setPriority(fc.getInt("Priority"));
-            if (fc.isString("Prefix")) group.setPrefix(fc.getString("Prefix"));
-            if (fc.isList("Permissions")) {
-              for (String perm : (List<String>) fc.getList("Permissions")) {
-                group.getPermissions().add(NationPermission.valueOf(perm));
-              }
-            }
-          }
-        }
         //loading nation members
-        if (new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Players").exists()) {
-          for (File fl : new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Players").listFiles()) {
-            FileConfiguration mc = YamlConfiguration.loadConfiguration(fl);
-            if (mc.getString("Nation").equals(name)) {
-              String uuid = fl.getName();
-              uuid = uuid.substring(0, uuid.length() - 4); //remove the .yml
-              UUID player = UUID.fromString(uuid);
-              nation.getMembers().put(player, new NationMember(this, player, nation));
-              ++loadedMembers;
-            }
-          }
+        for (Player player : Bukkit.getOnlinePlayers()) {
+          NationMember.addOnlineMember(loadMember(player.getUniqueId()));
         }
       }
     }
     isLoading = false;
     new DynmapUpdater(plugin);
-    Bukkit.getLogger().info(msg.get("console_loaded", true, Integer.toString(loadedNations), Integer.toString(loadedEstates), Integer.toString(loadedGroups), Integer.toString(loadedMembers)));
+    Bukkit.getLogger().info(msg.get("console_loaded", true, Integer.toString(loadedNations), Integer.toString(loadedEstates), Integer.toString(loadedMembers)));
+  }
+  
+  public NationMember loadMember(UUID uuid) {
+    File memberfile = new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Players"+uuid.toString()+".yml");
+    NationMember member = null;
+    if (memberfile.exists()) {
+      FileConfiguration cfg = YamlConfiguration.loadConfiguration(memberfile);
+      member = new NationMember(uuid);
+      if (cfg.isString("nation"))
+        member.setNation(Nation.getNationByString(cfg.getString("nation")));
+      if (cfg.isInt("priority"))
+        member.setPriority(cfg.getInt("priority"));
+      if (cfg.isList("permissions")) {
+        for (String perm : cfg.getStringList("permissions")) {
+          member.addPermission(NationPerm.valueOf(perm));
+        }
+      }
+    }
+    return member;
   }
   
   public void saveNation(Nation nation) {
     if (!isLoading) {
-      new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Nations", nation.toString()+".yml").delete();
+      new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Nations", nation.toString()+".yml").delete(); //delete old data
       ConfigAccessor ca = new ConfigAccessor(plugin, nation.toString()+".yml", "Nations");
       ConfigurationSection cs = ca.getConfig();
-      cs.set("Name", nation.toString());
-      cs.set("King", nation.getKing().toString());
-      cs.set("Capital", nation.getCapital().toString());
-      cs.set("Color", "#"+Integer.toHexString(nation.getColor()));
-      HashSet<String> estates = new HashSet<>();
-      for (Estate estate : nation.getEstates()) {
-        estates.add(estate.toString());
-      }
-      cs.set("Estates", estates.toArray(new String[estates.size()]));
-      if (!nation.getGroups().isEmpty()) {
-        HashSet<String> groups = new HashSet<>();
-        for (Group group : nation.getGroups()) {
-          groups.add(group.toString());
+      if (nation.getKing() != null)
+        cs.set("king", nation.getKing().toString());
+      if (nation.getCapital() != null)
+        cs.set("capital", nation.getCapital().toString());
+      cs.set("hexcolor", "#"+Integer.toHexString(nation.getHEXcolor()));
+      cs.set("mcolor", nation.getMCcolor().toString());
+      if (!Estate.getEstates().isEmpty()) {
+        ArrayList<String> estates = new ArrayList<>();
+        for (Estate estate : nation.getEstates()) {
+          estates.add(estate.toString());
         }
-        cs.set("Groups", groups.toArray(new String[groups.size()]));
+        cs.set("estates", estates);
       }
       if (!nation.getBannedPlayers().isEmpty()) {
-        HashSet<String> banned = new HashSet<>();
+        ArrayList<String> banned = new ArrayList<>();
         for (UUID uuid : nation.getBannedPlayers()) {
           banned.add(uuid.toString());
         }
-        cs.set("BannedPlayers", banned.toArray(new String[banned.size()]));
+        cs.set("bannedplayers", banned);
       }
-      HashSet<String> members = new HashSet<>();
-      for (UUID uuid : nation.getMembers().keySet()) {
-        members.add(uuid.toString());
+      if (!nation.getMembers().isEmpty()) {
+        ArrayList<String> members = new ArrayList<>();
+        for (UUID uuid : nation.getMembers()) {
+          members.add(uuid.toString());
+        }
+        cs.set("members", members);
       }
-      cs.set("Members", members.toArray(new String[members.size()]));
+      if (!nation.getAssistants().isEmpty()) {
+        ArrayList<String> assistants = new ArrayList<>();
+        for (UUID uuid : nation.getAssistants()) {
+          assistants.add(uuid.toString());
+        }
+        cs.set("members", assistants);
+      }
       ca.saveConfig();
     }
   }
@@ -166,66 +190,49 @@ public class ConfigLoader {
       new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Players", player.getUUID()+".yml").delete();
       ConfigAccessor ca = new ConfigAccessor(plugin, player.getUUID()+".yml", "Players");
       ConfigurationSection cs = ca.getConfig();
-      cs.set("Nation", player.getNation().toString());
-      if (!player.getPlayerGroups().isEmpty()) {
-        HashSet<String> groups = new HashSet<>();
-        for (Group group : player.getPlayerGroups()) {
-          groups.add(group.toString());
+      if (player.getNation() != null)
+        cs.set("nation", player.getNation().toString());
+      if (!player.getPermissions().isEmpty()) {
+        ArrayList<String> permissions = new ArrayList<>();
+        for (NationPerm permission : player.getPermissions()) {
+          permissions.add(permission.toString());
         }
-        cs.set("Groups", groups.toArray(new String[groups.size()]));
+        cs.set("permissions", permissions);
       }
-      for (String language : player.getLanguages().keySet()) {
-        cs.set("Languages."+language, player.getLanguages().get(language));
-      }
+      if (player.getPriority() != 0)
+        cs.set("priority", player.getPriority());
       ca.saveConfig();
     }
   }
+//done by now /\
   
-  public void saveGroup(Group group) {
-    if (!isLoading) {
-      new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Groups"+String.valueOf(File.separatorChar)+group.getNation().toString(), group.toString()+".yml").delete();
-      ConfigAccessor ca = new ConfigAccessor(plugin, group.toString()+".yml", "Groups", group.getNation().toString());
-      ConfigurationSection cs = ca.getConfig();
-      cs.set("Priority", group.getPriority());
-      if (!group.getPrefix().equals("")) cs.set("Prefix", group.getPrefix());
-      if (!group.getPermissions().isEmpty()) {
-        HashSet<String> list = new HashSet<>();
-        for (NationPermission perm : group.getPermissions()) {
-          list.add(perm.toString());
-        }
-        cs.set("Permissions", list.toArray(new String[list.size()]));
-      }
-      ca.saveConfig();
-    }
-  }
   
   public void saveEstate(Estate estate) {
     if (!isLoading) {
       new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Estates", estate.toString()+".yml").delete();
       ConfigAccessor ca = new ConfigAccessor(plugin, estate.toString()+".yml", "Estates");
       ConfigurationSection cs = ca.getConfig();
-      cs.set("Region", estate.getRegion().getId());
-      cs.set("RegionWorld", estate.getRegionWorld().getName());
-      cs.set("Spawn.World", estate.getSpawn().getWorld().getName());
-      cs.set("Spawn.X", estate.getSpawn().getX());
-      cs.set("Spawn.Y", estate.getSpawn().getY());
-      cs.set("Spawn.Z", estate.getSpawn().getZ());
-      cs.set("Spawn.Yaw", estate.getSpawn().getYaw());
-      cs.set("Spawn.Pitch", estate.getSpawn().getPitch());
+      cs.set("region", estate.getRegion().getId());
+      cs.set("spawn.world", estate.getSpawn().getWorld().getName());
+      cs.set("spawn.x", estate.getSpawn().getX());
+      cs.set("spawn.y", estate.getSpawn().getY());
+      cs.set("spawn.z", estate.getSpawn().getZ());
+      cs.set("spawn.yaw", estate.getSpawn().getYaw());
+      cs.set("spawn.pitch", estate.getSpawn().getPitch());
+      if (!estate.getDescription().isEmpty())
+        cs.set("description", estate.getDescription());
+      if (estate.getNation() != null)
+        cs.set("nation", estate.getNation().toString());
       ca.saveConfig();
     }
   }
   
-  public void delNationMember(NationMember member) {
-    new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Players", member.getUUID()+".yml").delete();
-  }
-  
-  public void delSavedGroup(Group group) {
-    new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Groups"+String.valueOf(File.separatorChar)+group.getNation().toString(), group.toString()+".yml").delete();
-  }
-  
   public void delSavedEstate(Estate estate) {
     new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Estates", estate.toString()+".yml").delete();
+  }
+  
+  public void delSavedNation(Nation nation) {
+    new File(plugin.getDataFolder()+String.valueOf(File.separatorChar)+"Nations", nation.toString()+".yml").delete();
   }
   
   public WorldGuardPlugin getWorldGuard() {

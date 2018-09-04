@@ -26,12 +26,12 @@ public class DynmapUpdater {
           x[i] = pt.getX();
           z[i] = pt.getZ();
       }
-      String markerid = e.getRegionWorld().getName() + "_" + e.getRegion().getId();
+      String markerid = e.getWorld().getName() + "_" + e.getRegion().getId();
       set.getMarkers().remove(set.findMarker(e.toString()));
-      AreaMarker m = set.createAreaMarker(markerid, e.toString(), false, e.getRegionWorld().getName(), x, z, false);
+      AreaMarker m = set.createAreaMarker(markerid, e.toString(), false, e.getWorld().getName(), x, z, false);
       m.setCornerLocations(x, z);
       m.setLabel(e.toString());
-      String desc = "<div class=\"infowindow\"><span style=\"font-size:120%;\"><b>"+e.toString()+"</b></span><br /> "+msg.get("raw_nation", false)+": "+(e.getNation() == null ? msg.get("raw_not_claimed", false) : e.getNation().toString())+"";
+      String desc = "<div class=\"infowindow\"><span style=\"font-size:120%;\"><b>"+e.toString()+"</b></span><br /> "+msg.get("raw_nation", false)+": "+(e.isOccupied() ? e.getNation().toString() : msg.get("raw_not_claimed", false))+"";
       if (!e.getDescription().isEmpty()) {
         for (String line : e.getDescription()) {
           desc += line+"<br />";
@@ -39,8 +39,8 @@ public class DynmapUpdater {
       }
       desc += "</div>";
       m.setDescription(desc);
-      m.setFillStyle(0.5, e.getNation() == null ? 0x7c7c77 : e.getNation().getColor());
-      m.setLineStyle(1, 1, e.getNation() == null ? 0x7c7c77 : e.getNation().getColor());
+      m.setFillStyle(0.5, e.getNation() == null ? 0x7c7c77 : e.getNation().getHEXcolor());
+      m.setLineStyle(1, 1, e.getNation() == null ? 0x7c7c77 : e.getNation().getHEXcolor());
     }
   }
 }

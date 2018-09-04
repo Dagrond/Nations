@@ -1,16 +1,13 @@
 package com.github.Dagrond.Nation;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import org.bukkit.ChatColor;
 
 import com.github.Dagrond.Utils.ConfigLoader;
-import com.github.Dagrond.Utils.DynmapUpdater;
 import com.github.Dagrond.Utils.msg;
-
 /*
  *  Nation class
  *  this stores all information about certain nation
@@ -21,172 +18,207 @@ public class Nation {
   private ConfigLoader config;
   private String name; //name of nation
   private UUID king; //king of nation
+  private HashSet<UUID> assistants = new HashSet<>(); //assistants of king of nation
   private Estate capital; //capital of this nation 
-  private HashSet<Estate> estates = new HashSet<>(); //estates of this nation
-  private HashSet<Group> groups = new HashSet<>(); //all groups created by this faction
-  private int color = 0xFF0000; //default color on dynmap
-  private HashSet<UUID> bannedPlayers = new HashSet<>(); //players who cannot join to this nation
-  private HashMap<UUID, NationMember> members = new HashMap<>(); //list of members of that nation, with groups of player
+  private HashSet<Estate> estates = new HashSet<>(); //estates of this nation (including capital)
+  private int HEXcolor = 0xFF0000; //HEX color of nation on dynmap
+  private ChatColor MCcolor = ChatColor.GRAY; //minecraft color of nation
+  private HashSet<UUID> bannedPlayers = new HashSet<>(); //players who are enemies of this nation
+  private HashSet<UUID> members = new HashSet<>(); //list of members of current nation
   
-  @SuppressWarnings("deprecation")
-  public Nation(ConfigLoader config, String name, String player, Estate capital) {
+  public Nation(String name, ConfigLoader config) {
     this.name = name;
-    nations.add(this);
     this.config = config;
-    this.capital = capital;
-    capital.setNation(this);
-    estates.add(capital);
-    UUID uuid = Bukkit.getOfflinePlayer(player).getUniqueId();
-    king = uuid;
-    members.put(uuid, new NationMember(config, uuid, this));
+    nations.add(this);
+    save();
+  }
+  
+  public void save() {
     config.saveNation(this);
   }
-  
-  public Nation(ConfigLoader config, String name, UUID uuid, Estate capital) {
-    this.name = name;
-    nations.add(this);
-    this.config = config;
-    capital.setNation(this);
-    this.capital = capital;
-    estates.add(capital);
-    king = uuid;
-    members.put(uuid, new NationMember(config, uuid, this));
-    config.saveNation(this);
-  }
-  
-  public void broadcastToOnlineMembers(String message) {
-    for (Player player : Bukkit.getOnlinePlayers()) {
-      if (isMember(player.getUniqueId()))
-        player.sendMessage(message);
-    }
-  }
-  
   //setters
-  
-  public void addMember(Player player) {
-    members.put(player.getUniqueId(), new NationMember(config, player.getUniqueId(), this));
-    broadcastToOnlineMembers(msg.get("nation_member_added", true, player.getName()));
-    config.saveNation(this);
+  public void setKing(UUID king) {
+    this.king = king;
+    save();
+  }
+  public void setHEXColor(int HEXcolor) {
+    this.HEXcolor = HEXcolor;
+    save();
+  }
+  public void setMCcolor(ChatColor MCcolor) {
+    this.MCcolor = MCcolor;
+    save();
+  }
+  public void setCapital (Estate capital) {
+    this.capital = capital;
+    save();
+  }
+  public void addEstate (Estate estate) {
+    estates.add(estate);
+    save();
+  }
+  public void delEstate (Estate estate) {
+    estates.remove(estate);
+    save();
+  }
+  public void addBannedPlayer(UUID banned) {
+    bannedPlayers.add(banned);
+    save();
+  }
+  public void delBannedPlayer(UUID banned) {
+    bannedPlayers.remove(banned);
+    save();
+  }
+  public void addMember(UUID member) {
+    members.add(member);
+    save();
+  }
+  public void delMember(UUID member) {
+    members.remove(member);
+    assistants.remove(member);
+    if (king.equals(member)) king = null;
+    save();
+  }
+  public void addAssistant(UUID assistant) {
+    assistants.add(assistant);
+    save();
+  }
+  public void delAssisstant(UUID assistant) {
+    assistants.remove(assistant);
+    save();
   }
   
-  public void removeEstate(Estate e) {
-    estates.remove(e);
-    config.saveNation(this);
+  //booleans
+  public boolean isAssistant(UUID player) {
+    return assistants.contains(player);
   }
-  
-  public void addEstate(Estate e) {
-    estates.add(e);
-    config.saveNation(this);
+  public boolean isBanned(UUID player) {
+    return bannedPlayers.contains(player);
   }
-  
-  public void kickMember(UUID uuid) {
-    NationMember.getMembers().remove(members.get(uuid));
-    config.delNationMember(members.get(uuid));
-    members.remove(uuid);
-    config.saveNation(this);
+  public boolean isMember(UUID player) {
+    return members.contains(player);
   }
-  
-  public void setColor(int color) {
-    this.color = color;
-    new DynmapUpdater(config.getMain());
-    config.saveNation(this);
+  public boolean isKing(UUID player) {
+    return king.equals(player);
   }
-  
-  public void setKing(UUID uuid) {
-    this.king = uuid;
-    if (!members.containsKey(uuid)) members.put(uuid, new NationMember(config, uuid, this));
-    config.saveNation(this);
+  public boolean isCapital(Estate estate) {
+    return capital.equals(estate);
   }
-  
-  public void banPlayer(UUID uuid) {
-    if (isMember(uuid)) kickMember(uuid);
-    bannedPlayers.add(uuid);
-    config.saveNation(this);
-  }
-  
-  public void setCapital(Estate estate) {
-    capital = estate;
-    if (!estates.contains(estate)) estates.add(estate);
-    config.saveNation(this);
-  }
-  
-  //checkers
-  
-  public boolean isMember(UUID uuid) {
-    return members.containsKey(uuid);
-  }
-  
-  public boolean hasEstate(String name ) {
-    for (Estate e : estates) {
-      if (e.toString().equalsIgnoreCase(name))
-        return true;
-    }
-    return false;
+  public boolean estateBelongs(Estate estate) {
+    return estates.contains(estate);
   }
   
   //getters
-  
   @Override
   public String toString() {
     return name;
   }
-  
-  public int getColor() {
-    return color;
+  public String getDisplayName() {
+    return MCcolor+name;
   }
-  
-  public Estate getCapital() {
-    return capital;
+  public int getEstateAmount() {
+    return estates.size();
   }
-  
-  public HashSet<UUID> getBannedPlayers() {
-    return bannedPlayers;
+  public ChatColor getMCcolor() {
+    return MCcolor;
   }
-  
-  public HashSet<Group> getGroups() {
-    return groups;
+  public int getHEXcolor() {
+    return HEXcolor;
   }
-  
   public UUID getKing() {
     return king;
   }
-  
+  public int getMemberAmount() {
+    return members.size();
+  }
+  public int getAssistantAmount() {
+    return assistants.size();
+  }
+  public int getBannedAmount() {
+    return bannedPlayers.size();
+  }
+  public Estate getCapital() {
+    return capital;
+  }
   public HashSet<Estate> getEstates() {
     return estates;
   }
-  
-  public static Nation getPlayerNation(UUID uuid) {
-    for (Nation nation : nations) {
-      if (nation.isMember(uuid)) return nation;
-    }
-    return null;
+  public HashSet<UUID> getBannedPlayers() {
+    return bannedPlayers;
   }
-  
-  public NationMember getMember(UUID uuid) {
-    return members.get(uuid);
-  }
-  
-  public Estate getEstate(String name) {
-    for (Estate e : estates) {
-      if (e.toString().equalsIgnoreCase(name))
-        return e;
-    }
-    return null;
-  }
-  
-  public HashMap<UUID, NationMember> getMembers() {
+  public HashSet<UUID> getMembers() {
     return members;
   }
-  
-  public static HashSet<Nation> getNations() {
-    return nations;
+  public HashSet<UUID> getAssistants() {
+    return assistants;
+  }
+  public String getMemberList() {
+    String list = "";
+    for (UUID member : members) {
+      list += Bukkit.getOfflinePlayer(member).getName()+", ";
+    }
+    if (!list.equalsIgnoreCase(""))
+      return list.substring(0, list.length() - 2);
+    else
+      return msg.get("none", false);
+  }
+  public String getBannedList() {
+    String list = "";
+    for (UUID banned : bannedPlayers) {
+      list += Bukkit.getOfflinePlayer(banned).getName()+", ";
+    }
+    if (!list.equalsIgnoreCase(""))
+      return list.substring(0, list.length() - 2);
+    else
+      return msg.get("none", false);
+  }
+  public String getAssistantsList() {
+    String list = "";
+    for (UUID assistant : assistants) {
+      list += Bukkit.getOfflinePlayer(assistant).getName()+", ";
+    }
+    if (!list.equalsIgnoreCase(""))
+      return list.substring(0, list.length() - 2);
+    else
+      return msg.get("none", false);
+  }
+  public String getEstatesList() {
+    String list = "";
+    for (Estate estate : estates) {
+      list += estate.toString()+", ";
+    }
+    if (!list.equalsIgnoreCase(""))
+      return list.substring(0, list.length() - 2);
+    else
+      return msg.get("none", false);
   }
   
-  public static Nation getNationByName(String name) {
-    for (Nation nation : nations) {
-      if (nation.toString().equalsIgnoreCase(name))
-        return nation;
+  //Static methods
+  
+  public static boolean isNation(String nation) {
+    for (Nation n : nations) {
+      if (n.toString().equalsIgnoreCase(nation)) return true;
+    }
+    return false;
+  }
+  public static Nation getNationByString(String nation) {
+    for (Nation n : nations) {
+      if (n.toString().equalsIgnoreCase(nation)) return n;
     }
     return null;
   }
+  public static int getNationAmount() {
+    return nations.size();
+  }
+  public static String getNationsList() {
+    String list = "";
+    for (Nation nation : nations) {
+      list += nation.getMCcolor()+nation.toString()+", ";
+    }
+    if (!list.equalsIgnoreCase(""))
+      return list.substring(0, list.length() - 2);
+    else
+      return msg.get("none", false);
+  }
+  
 }

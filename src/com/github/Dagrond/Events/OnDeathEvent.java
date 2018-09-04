@@ -8,7 +8,7 @@ public class OnDeathEvent implements Listener {
   
   @EventHandler
   public void onDeath(PlayerDeathEvent e) {
-    RespawnEvent.getDeathLocations().put(e.getEntity().getUniqueId(), e.getEntity().getLocation());
+    
   }
   
 }

@@ -10,10 +10,6 @@ import com.github.Dagrond.Commands.NationCommand;
 import com.github.Dagrond.Events.OnDeathEvent;
 import com.github.Dagrond.Events.RespawnEvent;
 import com.github.Dagrond.Events.onAsyncPlayerChatEvent;
-import com.github.Dagrond.Nation.Estate;
-import com.github.Dagrond.Nation.Group;
-import com.github.Dagrond.Nation.Nation;
-import com.github.Dagrond.Nation.NationMember;
 import com.github.Dagrond.Utils.ConfigLoader;
 import com.github.Dagrond.Utils.msg;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -37,10 +33,6 @@ public final class NationPlugin extends JavaPlugin {
     getServer().getPluginManager().registerEvents(new onAsyncPlayerChatEvent(), this);
     getServer().getPluginManager().registerEvents(new OnDeathEvent(), this);
     getServer().getPluginManager().registerEvents(new RespawnEvent(), this);
-    Estate.getEstates().clear();
-    Nation.getNations().clear();
-    NationMember.getMembers().clear();
-    Group.getGroups().clear();
     //load plugin
     Plugin wg = getServer().getPluginManager().getPlugin("WorldGuard");
     if (!(wg == null || !(wg instanceof WorldGuardPlugin))) worldGuard = (WorldGuardPlugin) wg;

@@ -7,7 +7,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 
 import com.github.Dagrond.Utils.ConfigLoader;
-import com.github.Dagrond.Utils.DynmapUpdater;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 
 public class Estate {
@@ -19,100 +18,79 @@ public class Estate {
   private boolean inWar = false; //describes if there is currently battle for this estate
   private Location spawn; //spawn location of this estate
   private ProtectedPolygonalRegion region; //region that is for this estate
-  private World world; //world of region
   
-  public Estate(String name, ProtectedPolygonalRegion region, World world, ConfigLoader config, Location spawn) {
+  public Estate(String name, Location spawn, ProtectedPolygonalRegion region, ConfigLoader config) {
     this.name = name;
-    this.region = region;
-    this.world = world;
-    this.config = config;
     this.spawn = spawn;
+    this.region = region;
+    this.config = config;
     estates.add(this);
-    config.saveEstate(this);
-    new DynmapUpdater(config.getMain());
+    save();
   }
   
+  public void save() {
+    config.saveEstate(this);
+  }
   //setters
+  public void setSpawn(Location location) {
+    spawn = location;
+    save();
+  }
   public void setNation(Nation nation) {
     this.nation = nation;
-    config.saveEstate(this);
-    //new DynmapUpdater(config.getMain(), this);
+    save();
   }
-  
-  public void del() {
-    if (nation != null)
-      nation.getEstates().remove(this);
-    config.delSavedEstate(this);
-    estates.remove(this);
+  public void toggleWar(boolean war) {
+    inWar = war;
+    save();
   }
-  
-  public void setSpawn(Location spawn) {
-    this.spawn = spawn;
-    config.saveEstate(this);
+  public void addLore(String lore) {
+    this.lore.add(lore);
+    save();
   }
-  
-  //checkers
-  
-  
+  public void editLore(int index, String lore) {
+    this.lore.add(index, lore);
+    save();
+  }
+  public void delLore(int index) {
+    lore.remove(index);
+    save();
+  }
+  //booleans
+  public boolean isInWar() {
+    return inWar;
+  }
+  public boolean isOccupied() {
+    return nation!=null;
+  }
   //getters
-  
   @Override
   public String toString() {
     return name;
   }
-  
   public ArrayList<String> getDescription() {
     return lore;
   }
-  
-  public static Estate getEstateByName(String name) {
-    for (Estate estate : estates) {
-      if (estate.toString().equalsIgnoreCase(name))
-        return estate;
-    }
-    return null;
-  }
-  
   public Nation getNation() {
     return nation;
   }
-  
-  public boolean isInWar() {
-    return inWar;
-  }
-  
-  public static HashSet<Estate> getEstates() {
-    return estates;
-  }
-  
   public Location getSpawn() {
     return spawn;
   }
-  
+  public World getWorld() {
+    return spawn.getWorld();
+  }
   public ProtectedPolygonalRegion getRegion() {
     return region;
   }
-  
-  public World getRegionWorld() {
-    return world;
+  //Static
+  public static HashSet<Estate> getEstates() {
+    return estates;
   }
-  
-  public static Location getNearestLocation(Location from, Nation nation) {
-    if (nation == null) return null;
-    if (from == null) {
-      return nation.getCapital().getSpawn();
-    }
-    double distance = -1;
-    Location nearest = null;
-    for (Estate estate : estates) {
-      if (estate.getNation() != null && estate.getNation().equals(nation) && !estate.isInWar()) {
-        double newDist = from.distance(estate.getSpawn());
-        if (newDist < distance || distance == -1) {
-          distance = newDist;
-          nearest = estate.getSpawn();
-        }
-      }
-    }
-    return nearest;
+  public static Estate getEstate(String estate) {
+    for (Estate e : estates)
+      if (e.toString().equalsIgnoreCase(estate))
+        return e;
+    return null;
   }
 }

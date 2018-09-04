@@ -1,19 +1,15 @@
 package com.github.Dagrond.Commands;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
-import com.github.Dagrond.Nation.Estate;
-import com.github.Dagrond.Nation.Group;
 import com.github.Dagrond.Nation.Nation;
 import com.github.Dagrond.Nation.NationMember;
-import com.github.Dagrond.Nation.Group.NationPermission;
 import com.github.Dagrond.Utils.ConfigLoader;
 import com.github.Dagrond.Utils.msg;
-import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 
 
 public class NationCommand implements CommandExecutor {
@@ -26,334 +22,114 @@ public class NationCommand implements CommandExecutor {
   @Override
   public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
     if (cmd.getName().equalsIgnoreCase("Nation") || cmd.getName().equalsIgnoreCase("n")) {
-      Player player;
-      if (sender instanceof Player)
-        player = (Player) sender;
-      else {
-        sender.sendMessage(msg.get("error_player_needed", true));
+      if (args.length < 1) {
+        sender.sendMessage(msg.get("error_help", true));
         return true;
       }
-      Condition c = new Condition(player, config);
-      if (args.length<1) {
-        sender.sendMessage(msg.get("error_usage", true, "/n help"));
-        return true;
+      if (args[0].equalsIgnoreCase("admin") || args[0].equalsIgnoreCase("a")) {
+        if (args.length > 2) {
+          if (sender.hasPermission("Nations.Admin")) {
+            if (args[1].equalsIgnoreCase("nation") || args[1].equalsIgnoreCase("n")) {
+              if (args[2].equalsIgnoreCase("create")) {
+                if (args.length > 3) {
+                  if (!Nation.isNation(args[2])) {
+                    new Nation(args[2], config);
+                    sender.sendMessage(msg.get("nation_created", true, args[2]));
+                  } else
+                    sender.sendMessage(msg.get("error_nation_exist", true, args[2]));
+                } else
+                  sender.sendMessage(msg.get("error_usage", true, "/n a n create <nazwa>"));
+              } else if (args[2].equalsIgnoreCase("info")) {
+                if (args.length > 3) {
+                  if (Nation.isNation(args[3])) {
+                    Nation nation = Nation.getNationByString(args[3]);
+                    sender.sendMessage(msg.get("nation_admin_info", true, nation.getDisplayName()));
+                    sender.sendMessage(msg.get("nation_info_king", false, nation.getKing() == null ? msg.get("none", false) : Bukkit.getOfflinePlayer(nation.getKing()).getName()));
+                    sender.sendMessage(msg.get("nation_info_capital", false, nation.getCapital() == null ? msg.get("none", false) : nation.getCapital().toString()));
+                    sender.sendMessage(msg.get("nation_info_assistants", false, Integer.toString(nation.getAssistantAmount()), nation.getAssistantsList()));
+                    sender.sendMessage(msg.get("nation_info_members", false, Integer.toString(nation.getMemberAmount())));
+                    sender.sendMessage(msg.get("nation_info_estates", false, Integer.toString(nation.getEstateAmount()), nation.getEstatesList()));
+                    sender.sendMessage(msg.get("nation_info_enemies", false, Integer.toString(nation.getBannedAmount())));
+                    sender.sendMessage(msg.get("nation_info_colors", false, "#"+nation.getHEXcolor(), nation.getMCcolor().toString()));
+                  } else
+                    sender.sendMessage(msg.get("error_not_a_nation", true, args[3]));
+                } else
+                  sender.sendMessage(msg.get("error_usage", true, "/n a n info <panstwo>"));
+              } else if (args[2].equalsIgnoreCase("king")) {
+                if (args.length > 4) {
+                  if (Nation.isNation(args[3])) {
+                    @SuppressWarnings("deprecation")
+                    OfflinePlayer king = Bukkit.getOfflinePlayer(args[4]);
+                    if (king.hasPlayedBefore() || king.isOnline()) {
+                      Nation nation = Nation.getNationByString(args[3]);
+                      NationMember kingMember = NationMember.getNationMember(king.getUniqueId());
+                      if (kingMember.hasNation() && kingMember.getNation().equals(nation)) {
+                        //del player from assistants, purge permissions etc
+                        kingMember.setNation(nation);
+                      } else if (!kingMember.hasNation()) {
+                        kingMember.setNation(nation);
+                        //send proper message that this player was added to nation first
+                        sender.sendMessage(msg.get("error_king_not_in_nation", true, args[4], args[3]));
+                      } else
+                        sender.sendMessage(msg.get("error_king_in_other_nation", true, args[4], kingMember.getNation().getDisplayName()));
+                      sender.sendMessage(msg.get("nation_king_setted", true, args[4], nation.getDisplayName()));
+                    } else
+                      sender.sendMessage(msg.get("error_king_has_to_played_before", true, args[4]));
+                  } else
+                    sender.sendMessage(msg.get("error_not_a_nation", true, args[3]));
+                } else 
+                  sender.sendMessage(msg.get("error_usage", true, "/n a n king <panstwo> <krol>"));
+              } else if (args[2].equalsIgnoreCase("list")) {
+                sender.sendMessage(msg.get("nation_list", true, Integer.toString(Nation.getNationAmount()), Nation.getNationsList()));
+              } else if (args[2].equalsIgnoreCase("assistant")) {
+                if (!Nation.isNation(args[3])) {
+                  sender.sendMessage(msg.get("error_not_a_nation", true, args[3]));
+                  return true;
+                }
+                Nation nation = Nation.getNationByString(args[3]);
+                if (args.length > 4) {
+                  if (args[4].equalsIgnoreCase("list")) {
+                    sender.sendMessage(msg.get("nation_info_assistants", true, Integer.toString(nation.getAssistantAmount()), nation.getAssistantsList()));
+                  } else if (args[4].equalsIgnoreCase("add")) {
+                    @SuppressWarnings("deprecation")
+                    OfflinePlayer ass = Bukkit.getOfflinePlayer(args[4]);
+                    if (ass.hasPlayedBefore() || ass.isOnline()) {
+                      NationMember assMember = NationMember.getNationMember(ass.getUniqueId());
+                      if (assMember.hasNation() && assMember.getNation().equals(nation)) {
+                        //del player from assistants, purge permissions etc
+                        assMember.setNation(nation);
+                      } else if (!assMember.hasNation()) {
+                        assMember.setNation(nation);
+                        //send proper message that this player was added to nation first
+                        sender.sendMessage(msg.get("error_king_not_in_nation", true, args[4], args[3]));
+                      } else
+                        sender.sendMessage(msg.get("error_king_in_other_nation", true, args[4], kingMember.getNation().getDisplayName()));
+                      sender.sendMessage(msg.get("nation_ass_added", true, args[4], nation.getDisplayName()));
+                    } else
+                      sender.sendMessage(msg.get("error_ass_has_to_played_before", true, args[4]));
+                  } else if (args[4].equalsIgnoreCase("del")) {
+                    
+                  } else
+                    sender.sendMessage(msg.get("error_usage", true, "/at a n assistant <panstwo> <add/del/list> (gracz)"));
+                } else
+                  sender.sendMessage(msg.get("error_usage", true, "/at a n assistant <panstwo> <add/del/list> (gracz)"));
+              } else
+                sender.sendMessage(msg.get("error_usage", true, "/n help admin"));
+            } else if (args[1].equalsIgnoreCase("reload")) {
+              config.getMain().reload(sender);
+            } else if (args[1].equalsIgnoreCase("estate") || args[1].equalsIgnoreCase("e")) {
+              //todo...
+            } else if (args[1].equalsIgnoreCase("member") || args[1].equalsIgnoreCase("m")) {
+              
+            } else
+              sender.sendMessage(msg.get("error_usage", true, "/n help admin"));
+          } else
+            msg.get("error_permission", true);
+        } else
+          sender.sendMessage(msg.get("error_usage", true, "/n help admin"));
+      } else if (args[0].equalsIgnoreCase("ban")) {
+        sender.sendMessage("todo...");
       }
-      switch (args[0].toLowerCase()) {
-      case "admin":
-        if (!c.hasPermission("Nations.admin", "Nations.*")) return true;
-        if (args.length>1) {
-          switch (args[1]) {
-          case "create":
-            if (!c.hasPermission("Nations.create", "Nations.*")) return true;
-            if (args.length>4) {
-              if (!c.isNotNation(args[2])) return true;
-              if (!c.notMemberofNation(args[3])) return true;
-              if (!c.isEstate(args[4])) return true;
-              if (!c.isFreeEstate(args[4])) return true;
-              new Nation(config, args[2], args[3], Estate.getEstateByName(args[4]));
-              sender.sendMessage(msg.get("nation_created", true, args[2], args[3]));
-            } else {
-              sender.sendMessage(msg.get("error_usage", true, "/n admin create <name> <king> <capital>"));
-            }
-            break;
-          case "color":
-            if (args.length>3) {
-              if (!c.isNation(args[2])) return true;
-              if (!c.isHex(args[3])) return true;
-              Nation.getNationByName(args[2]).setColor(Integer.parseInt(args[3].substring(1), 16));
-              player.sendMessage(msg.get("nation_color_setted", true, args[2], args[3]));
-            } else {
-              player.sendMessage(msg.get("error_usage", true, "/n admin color <nation> <color>"));
-            }
-            break;
-          case "estate":
-            if (args.length>2) {
-              switch (args[2].toLowerCase()) {
-              case "add":
-                if (args.length>4) {
-                  if (!c.isNotEstate(args[3])) return true;
-                  if (!c.isPolygonalRegion(args[4], player.getWorld())) return true;
-                  ProtectedPolygonalRegion region = (ProtectedPolygonalRegion) config.getWorldGuard().getRegionManager(player.getWorld()).getRegion(args[4]);
-                  if (c.isAlreadyInEstate(region, player.getWorld())) return true;
-                  new Estate(args[3], region, player.getWorld(), config, player.getLocation());
-                  player.sendMessage(msg.get("estate_added", true, args[3]));
-                } else {
-                  player.sendMessage(msg.get("error_usage", true, "/n admin estate add <name> <region>"));
-                }
-                break;
-              case "del":
-                if (args.length>3) {
-                  if (!c.isEstate(args[3])) return true;
-                  Estate est = Estate.getEstateByName(args[3]);
-                  if (!c.isNotCapital(est)) return true;
-                  est.del();
-                  player.sendMessage(msg.get("estate_removed", true, args[3]));
-                } else {
-                  player.sendMessage(msg.get("error_usage", true, "/n admin estate del <name>"));
-                }
-                break;
-              case "list":
-                String list = "";
-                for (Estate estate : Estate.getEstates()) {
-                  list+= estate.toString()+", ";
-                }
-                if (!list.equalsIgnoreCase(""))
-                  list = list.substring(0, list.length() - 2);
-                else
-                  list = msg.get("none", false);
-                player.sendMessage(msg.get("estate_list", true, list));
-                break;
-              case "setspawn":
-                if (args.length>3) {
-                  if (!c.isEstate(args[3])) return true;
-                  Estate.getEstateByName(args[3]).setSpawn(player.getLocation());
-                  player.sendMessage(msg.get("estate_spawn_setted", true, args[3]));
-                } else {
-                  player.sendMessage(msg.get("error_usage", true, "/n admin estate setspawn <name>"));
-                }
-                break;
-              case "spawn":
-                if (args.length>3) {
-                  if (!c.isEstate(args[3])) return true;
-                  player.teleport(Estate.getEstateByName(args[3]).getSpawn());
-                  player.sendMessage(msg.get("estate_spawn_teleported", true, args[3]));
-                } else {
-                  player.sendMessage(msg.get("error_usage", true, "/n admin estate spawn <name>"));
-                }
-                break;
-              case "give":
-                if (args.length>4) {
-                  if (!c.isEstate(args[3])) return true;
-                  Estate es = Estate.getEstateByName(args[3]);
-                  if (!c.isNation(args[4])) return true;
-                  Nation nt = Nation.getNationByName(args[4]);
-                  if (!c.isNotCapital(es)) return true;
-                  if (es.getNation() == null) {
-                    es.setNation(nt);
-                    player.sendMessage(msg.get("estate_gived", true, args[3], args[4]));
-                  } else {
-                    es.getNation().removeEstate(es);
-                    es.setNation(nt);
-                    nt.addEstate(es);
-                    player.sendMessage(msg.get("estate_forced", true, args[3], args[4]));
-                  }
-                } else {
-                  player.sendMessage(msg.get("error_usage", true, "/n estate give <estate> <nation>"));
-                }
-                break;
-              case "info":
-                if (args.length>3) {
-                  if (!c.isEstate(args[3])) return true;
-                  Estate e = Estate.getEstateByName(args[3]);
-                  player.sendMessage(msg.get("estate_info_name", true, e.toString()));
-                  player.sendMessage(msg.get("estate_info_nation", true, e.getNation() == null ? msg.get("not_assigned", false) : e.getNation().toString()));
-                } else {
-                  player.sendMessage(msg.get("error_usage", true, "/n admin estate info <name>"));
-                }
-                break;
-              default:
-                player.sendMessage(msg.get("error_usage", true, "/n admin estate <add/del/list/info/spawn/setspawn>"));
-                break;
-              }
-            } else {
-              player.sendMessage(msg.get("error_usage", true, "/n admin estate <add/del/list/info/spawn/setspawn>"));
-            }
-            break;
-          case "reload":
-            config.getMain().reload(sender);
-            break;
-          default:
-            player.sendMessage(msg.get("error_usage", true, "/n admin <create/estate/reload>"));
-            break;
-          }
-        } else {
-          player.sendMessage(msg.get("error_usage", true, "/n admin <create/estate/reload>"));
-        }
-        break;
-      case "rank":
-        if (!c.hasNation()) return true;
-        if (!c.isKing()) return true;
-        if (args.length>2 && !args[1].equalsIgnoreCase("add") && args[1].equalsIgnoreCase("list")) {
-          Group group = Group.matchGroup(args[1], Nation.getPlayerNation(player.getUniqueId()));
-          if (group == null) {
-            sender.sendMessage(msg.get("error_group_not_exist", true, args[1]));
-            return true;
-          }
-          switch (args[2].toLowerCase()) {
-          case "perm":
-            if (args.length>3) {
-              switch (args[3].toLowerCase()) {
-              case "listall":
-                String list = "";
-                for (NationPermission g : NationPermission.values()) {
-                  list+= g.toString()+", ";
-                }
-                if (!list.equalsIgnoreCase(""))
-                  list = list.substring(0, list.length() - 2);
-                else
-                  list = msg.get("none", false);
-                player.sendMessage(msg.get("nation_group_allpermlist", true, list));
-                break;
-              case "list":
-                String l = "";
-                for (NationPermission g : group.getPermissions()) {
-                  l+= g.toString()+", ";
-                }
-                if (!l.equalsIgnoreCase(""))
-                  l = l.substring(0, l.length() - 2);
-                else
-                  l = msg.get("none", false);
-                player.sendMessage(msg.get("nation_group_permlist", true, args[1], l));
-                break;
-              case "add":
-                if (args.length>4) {
-                  if (!c.isPermission(args[4])) return true;
-                  if (!c.hasNationPermission(group, NationPermission.valueOf(args[4]))) return true;
-                  group.addPermission(args[4]);
-                  player.sendMessage(msg.get("nation_group_permission_added", true, args[4], args[1]));
-                  return true;
-                } else {
-                  player.sendMessage(msg.get("error_usage", true, "/n rank "+args[1]+" perm add <perm>"));
-                }
-                break;
-              case "del":
-                if (args.length>4) {
-                  if (!c.isPermission(args[4])) return true;
-                  if (!c.hasNationPermission(group, NationPermission.valueOf(args[4]))) return true;
-                  group.addPermission(args[4]);
-                  player.sendMessage(msg.get("nation_group_permission_deleted", true, args[4], args[1]));
-                  return true;
-                } else {
-                  player.sendMessage(msg.get("error_usage", true, "/n rank "+args[1]+" perm del <perm>"));
-                }
-                break;
-              default:
-                player.sendMessage(msg.get("error_usage", true, "/n rank <rank> perm list/listall/add/del"));
-                break;
-              }
-            } else
-              player.sendMessage(msg.get("error_usage", true, "/n rank <rank> perm list/listall/add/del"));
-            break;
-          case "del":
-            group.delGroup();
-            player.sendMessage(msg.get("nation_group_deleted", true, args[1]));
-            break;
-          case "promote":
-            if (args.length>3) {
-              if (!c.isInSameNation(args[3])) return true;
-              if (!c.hasNotGroup(group, args[3])) return true;
-              NationMember.matchMemberByUUID(Bukkit.getPlayer(args[3]).getUniqueId()).addToGroup(group);
-              player.sendMessage(msg.get("nation_group_player_added", true, args[1], args[3]));
-            } else
-              player.sendMessage(msg.get("error_usage", true, "/n rank <rank> promote <player>"));
-            break;
-          case "demote":
-            if (args.length>3) {
-              if (!c.isInSameNation(args[3])) return true;
-              if (!c.hasGroup(group, args[3])) return true;
-              NationMember.matchMemberByUUID(Bukkit.getPlayer(args[3]).getUniqueId()).kickFromGroup(group);
-              player.sendMessage(msg.get("nation_group_player_deleted", true, args[1], args[3]));
-            } else
-              player.sendMessage(msg.get("error_usage", true, "/n rank <rank> demote <player>"));
-            break;
-          case "priority":
-            if (args.length>3) {
-              if (!c.isInt(args[3])) return true;
-              int priority = Integer.valueOf(args[3]);
-              if (priority>= 0) {
-                group.setPriority(priority);
-                player.sendMessage(msg.get("nation_priority_setted", true, args[1], args[3]));
-              } else {
-                player.sendMessage(msg.get("error_must_be_greater_than", true, "priority", "0"));
-              }
-            } else
-              player.sendMessage(msg.get("error_usage", true, "/n rank <rank> priority <priority>"));
-            break;
-          case "prefix":
-            if (args.length>3) {
-              group.setPrefix(args[3]);
-              player.sendMessage(msg.get("nation_prefix_setted", true, args[1], args[3]));
-            } else
-              player.sendMessage(msg.get("error_usage", true, "/n rank <rank> prefix <prefix>"));
-            break;
-          default:
-            sender.sendMessage(msg.get("error_usage", true, "/n rank <rank> <perm/del/promote/demote/prefix/info/priority>"));
-            break;
-          }
-        } else {
-          switch (args[1].toLowerCase()) {
-          case "list":
-            String list = "";
-            for (Group g : Group.getGroups()) {
-              list+= g.toString()+", ";
-            }
-            if (!list.equalsIgnoreCase(""))
-              list = list.substring(0, list.length() - 2);
-            else
-              list = msg.get("none", false);
-            player.sendMessage(msg.get("nation_group_list", true, list));
-            break;
-          case "add":
-            if (args.length>2) {
-              Group group = Group.matchGroup(args[2], Nation.getPlayerNation(player.getUniqueId()));
-              if (group == null) {
-                if (!args[2].equalsIgnoreCase("list") && !args[2].equalsIgnoreCase("listall") && !args[2].equalsIgnoreCase("add")) {
-                  new Group(args[2], Nation.getPlayerNation(player.getUniqueId()), config);
-                  player.sendMessage(msg.get("nation_group_created", true, args[2]));
-                  return true;
-                } else {
-                  player.sendMessage(msg.get("error_banned_name", true, args[2]));
-                }
-              } else {
-                player.sendMessage(msg.get("error_group_exist", true, args[2]));
-              }
-            } else {
-              sender.sendMessage(msg.get("error_usage", true, "/n rank add <name>"));
-            }
-            break;
-          default:
-            sender.sendMessage(msg.get("error_usage", true, "/n rank <rank> <list/add>"));
-          }
-        break;
-        }
-      case "info":
-        Nation nation = null;
-        if (args.length>1) {
-          if (!c.isNation(args[1])) return true;
-          nation = Nation.getNationByName(args[1]);
-        } else  {
-          if (!c.hasNation()) return true;
-          nation = Nation.getPlayerNation(player.getUniqueId());
-        }
-        player.sendMessage(msg.get("nation_info_name", true, nation.toString()));
-        player.sendMessage(msg.get("nation_info_capital", false, nation.getCapital().toString()));
-        player.sendMessage(msg.get("nation_info_king", false, Bukkit.getOfflinePlayer(nation.getKing()).getName()));
-        player.sendMessage(msg.get("nation_info_members", false, Integer.toString(nation.getMembers().size())));
-        player.sendMessage(msg.get("nation_info_estates", false, Integer.toString(nation.getEstates().size())));
-        break;
-      case "join":
-        if (args.length>1) {
-          if (!c.isNation(args[1])) return true;
-          if (!c.hasNoNation()) return true;
-          Nation n = Nation.getNationByName(args[1]);
-          if (!c.checkIfCanJoin(n)) return true;
-          if (c.isBannedFromNation(n)) return true;
-          n.addMember(player);
-          player.sendMessage(msg.get("nation_joined", true, args[1]));
-        } else {
-          player.sendMessage(msg.get("error_usage", true, "/n join <nation>"));
-        }
-        break;
-      case "ban":
-        //todo
-        break;
-      case "list":
-        //todo
-        break;
-      default:
-        sender.sendMessage(msg.get("error_usage", true, "/n help"));
-      }
-      return true;
     }
   return true;
   }
