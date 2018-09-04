@@ -19,6 +19,7 @@ public class NationCommand implements CommandExecutor {
     this.config = config;
   }
   
+  @SuppressWarnings("deprecation")
   @Override
   public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
     if (cmd.getName().equalsIgnoreCase("Nation") || cmd.getName().equalsIgnoreCase("n")) {
@@ -58,20 +59,27 @@ public class NationCommand implements CommandExecutor {
               } else if (args[2].equalsIgnoreCase("king")) {
                 if (args.length > 4) {
                   if (Nation.isNation(args[3])) {
-                    @SuppressWarnings("deprecation")
                     OfflinePlayer king = Bukkit.getOfflinePlayer(args[4]);
                     if (king.hasPlayedBefore() || king.isOnline()) {
                       Nation nation = Nation.getNationByString(args[3]);
                       NationMember kingMember = NationMember.getNationMember(king.getUniqueId());
                       if (kingMember.hasNation() && kingMember.getNation().equals(nation)) {
+                        if (kingMember.isKing()) {
+                          sender.sendMessage(msg.get("error_already_king", true, args[4]));
+                          return true;
+                        }
                         //del player from assistants, purge permissions etc
                         kingMember.setNation(nation);
+                        nation.setKing(Bukkit.getOfflinePlayer(args[4]).getUniqueId());
                       } else if (!kingMember.hasNation()) {
                         kingMember.setNation(nation);
                         //send proper message that this player was added to nation first
                         sender.sendMessage(msg.get("error_king_not_in_nation", true, args[4], args[3]));
-                      } else
-                        sender.sendMessage(msg.get("error_king_in_other_nation", true, args[4], kingMember.getNation().getDisplayName()));
+                        nation.setKing(Bukkit.getOfflinePlayer(args[4]).getUniqueId());
+                      } else {
+                        sender.sendMessage(msg.get("error_king_in_other_nation", true, args[4], args[3]));
+                        return true;
+                      }
                       sender.sendMessage(msg.get("nation_king_setted", true, args[4], nation.getDisplayName()));
                     } else
                       sender.sendMessage(msg.get("error_king_has_to_played_before", true, args[4]));
@@ -91,24 +99,42 @@ public class NationCommand implements CommandExecutor {
                   if (args[4].equalsIgnoreCase("list")) {
                     sender.sendMessage(msg.get("nation_info_assistants", true, Integer.toString(nation.getAssistantAmount()), nation.getAssistantsList()));
                   } else if (args[4].equalsIgnoreCase("add")) {
-                    @SuppressWarnings("deprecation")
                     OfflinePlayer ass = Bukkit.getOfflinePlayer(args[4]);
                     if (ass.hasPlayedBefore() || ass.isOnline()) {
                       NationMember assMember = NationMember.getNationMember(ass.getUniqueId());
                       if (assMember.hasNation() && assMember.getNation().equals(nation)) {
-                        //del player from assistants, purge permissions etc
+                        if (assMember.isAssistant() || assMember.isKing()) {
+                          sender.sendMessage(msg.get("error_already_assistant", true, args[4]));
+                          return true;
+                        }
+                        //purge permissions etc
                         assMember.setNation(nation);
-                      } else if (!assMember.hasNation()) {
-                        assMember.setNation(nation);
-                        //send proper message that this player was added to nation first
-                        sender.sendMessage(msg.get("error_king_not_in_nation", true, args[4], args[3]));
-                      } else
-                        sender.sendMessage(msg.get("error_king_in_other_nation", true, args[4], kingMember.getNation().getDisplayName()));
+                        nation.addAssistant(Bukkit.getOfflinePlayer(args[4]).getUniqueId());
+                      } else {
+                        sender.sendMessage(msg.get("error_assistant_in_other_nation", true, args[4], args[3]));
+                        return true;
+                      }
                       sender.sendMessage(msg.get("nation_ass_added", true, args[4], nation.getDisplayName()));
                     } else
                       sender.sendMessage(msg.get("error_ass_has_to_played_before", true, args[4]));
                   } else if (args[4].equalsIgnoreCase("del")) {
-                    
+                    OfflinePlayer ass = Bukkit.getOfflinePlayer(args[4]);
+                    if (ass.hasPlayedBefore() || ass.isOnline()) {
+                      NationMember assMember = NationMember.getNationMember(ass.getUniqueId());
+                      if (assMember.hasNation() && assMember.getNation().equals(nation)) {
+                        if (assMember.isAssistant()) {
+                          nation.delAssisstant(Bukkit.getOfflinePlayer(args[4]).getUniqueId());
+                          sender.sendMessage(msg.get("nation_ass_deleted", true, args[4], nation.getDisplayName()));
+                          return true;
+                        } else {
+                          sender.sendMessage(msg.get("error_not_assistant", true, args[4]));
+                          return true;
+                        }
+                      } else
+                        sender.sendMessage(msg.get("error_assistant_in_other_nation", true, args[4]));
+                      sender.sendMessage(msg.get("nation_ass_added", true, args[4], nation.getDisplayName()));
+                    } else
+                      sender.sendMessage(msg.get("error_ass_has_to_played_before", true, args[4]));
                   } else
                     sender.sendMessage(msg.get("error_usage", true, "/at a n assistant <panstwo> <add/del/list> (gracz)"));
                 } else
@@ -118,7 +144,21 @@ public class NationCommand implements CommandExecutor {
             } else if (args[1].equalsIgnoreCase("reload")) {
               config.getMain().reload(sender);
             } else if (args[1].equalsIgnoreCase("estate") || args[1].equalsIgnoreCase("e")) {
-              //todo...
+              if (args.length > 2) {
+                if (args[2].equalsIgnoreCase("info")) {
+                  
+                } else if (args[2].equalsIgnoreCase("list")) {
+                  
+                } else if (args[2].equalsIgnoreCase("add")) {
+                  
+                } else if (args[2].equalsIgnoreCase("del")) {
+                  
+                } else if (args[2].equalsIgnoreCase("give")) {
+                  
+                } else
+                  sender.sendMessage(msg.get("error_usage", true, "/n help adm"));
+              } else
+                sender.sendMessage(msg.get("error_usage", true, "/n a e info/list/add/del/give <nazwa>"));
             } else if (args[1].equalsIgnoreCase("member") || args[1].equalsIgnoreCase("m")) {
               
             } else

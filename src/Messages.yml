@@ -42,6 +42,9 @@ error_king_has_to_played_before: "Aby gracz %1 zostal krolem, musi chociaz raz w
 error_ass_has_to_played_before: "Aby gracz %1 zostal asystentem, musi chociaz raz wejsc na serwer!"
 error_king_not_in_nation: "Gracz %1 nie byl w panstwie %2! Dodano go do tego panstwa."
 error_king_in_other_nation: "Gracz %1 nalezy do panstwa %2! Aby zostac krolem, musi byc bezpanstwowy lub nalezec do panstwa, ktorego krolem ma zostac."
+error_already_king: "Gracz %1 jest juz krolem!"
+error_already_assistant: "Gracz %1 jest juz asystentem krola lub krolem!"
+error_assistant_in_other_nation: "Gracz %1 nie nalezy do panstwa %2!"
 
 #help pages
 

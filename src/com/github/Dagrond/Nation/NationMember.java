@@ -66,6 +66,12 @@ public class NationMember {
   public boolean hasNation() {
     return nation!=null;
   }
+  public boolean isKing() {
+    return nation != null && nation.getKing().equals(player);
+  }
+  public boolean isAssistant() {
+    return nation != null && nation.getAssistants().contains(player);
+  }
   //getters
   public UUID getUUID() {
     return player;
