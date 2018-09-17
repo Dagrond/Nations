@@ -7,7 +7,13 @@ import org.bukkit.Location;
 import org.bukkit.World;
 
 import com.github.Dagrond.Utils.ConfigLoader;
+import com.github.Dagrond.Utils.DynmapUpdater;
+import com.github.Dagrond.Utils.msg;
+import com.sk89q.worldguard.bukkit.WGBukkit;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+
+import net.md_5.bungee.api.ChatColor;
 
 public class Estate {
   private static HashSet<Estate> estates = new HashSet<>(); //set of all estates
@@ -26,6 +32,7 @@ public class Estate {
     this.config = config;
     estates.add(this);
     save();
+    new DynmapUpdater(config.getMain());
   }
   
   public void save() {
@@ -55,6 +62,27 @@ public class Estate {
   public void delLore(int index) {
     lore.remove(index);
     save();
+  }
+  //Clear all relationships with current nation that owes this estate
+  //including removing child regions & all other shit
+  public void clearAffiliation() {
+    //remove all child regions
+    for (ProtectedRegion region : WGBukkit.getRegionManager(spawn.getWorld()).getApplicableRegions(region).getRegions()) {
+      if (!region.getId().startsWith("static_"))
+        WGBukkit.getRegionManager(spawn.getWorld()).removeRegion(region.getId());
+    }
+    //clear owner & members of estate's region
+    region.getOwners().removeAll();
+    region.getMembers().removeAll();
+    if (nation != null) {
+      nation.delEstate(this);
+      nation = null;
+    }
+  }
+  public void delete() {
+    clearAffiliation();
+    estates.remove(this);
+    config.delSavedEstate(this);
   }
   //booleans
   public boolean isInWar() {
@@ -86,6 +114,19 @@ public class Estate {
   //Static
   public static HashSet<Estate> getEstates() {
     return estates;
+  }
+  public static boolean isEstate(String estate) {
+    return getEstate(estate) != null;
+  }
+  public static String getFullList() {
+    String list = "";
+    for (Estate estate : estates) {
+      list += (estate.getNation() != null ? estate.getNation().getMCcolor() : ChatColor.GRAY)+estate.toString()+", ";
+    }
+    if (!list.equalsIgnoreCase(""))
+      return list.substring(0, list.length() - 2);
+    else
+      return msg.get("none", false);
   }
   public static Estate getEstate(String estate) {
     for (Estate e : estates)

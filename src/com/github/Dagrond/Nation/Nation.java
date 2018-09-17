@@ -5,9 +5,12 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 
 import com.github.Dagrond.Utils.ConfigLoader;
 import com.github.Dagrond.Utils.msg;
+import com.sk89q.worldguard.bukkit.WGBukkit;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 /*
  *  Nation class
  *  this stores all information about certain nation
@@ -107,6 +110,16 @@ public class Nation {
   public boolean estateBelongs(Estate estate) {
     return estates.contains(estate);
   }
+  public boolean isInNationTerrority(Player player) {
+    for (Estate e : estates) {
+      if (player.getWorld().equals(e.getWorld()) &&
+      WGBukkit.getRegionManager(player.getWorld()).getApplicableRegions(player.getLocation()).getRegions().contains((ProtectedRegion) e.getRegion())) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
   
   //getters
   @Override
@@ -194,7 +207,6 @@ public class Nation {
   }
   
   //Static methods
-  
   public static boolean isNation(String nation) {
     for (Nation n : nations) {
       if (n.toString().equalsIgnoreCase(nation)) return true;
@@ -209,6 +221,18 @@ public class Nation {
   }
   public static int getNationAmount() {
     return nations.size();
+  }
+  public static boolean isInOwn(Player player) {
+    
+    return false;
+  }
+  public static Nation getPlayerNation(Player player) {
+    for (Nation n : nations) {
+      if (n.isMember(player.getUniqueId())) {
+        return n;
+      }
+    }
+    return null;
   }
   public static String getNationsList() {
     String list = "";

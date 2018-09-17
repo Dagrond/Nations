@@ -31,7 +31,8 @@ public class DynmapUpdater {
       AreaMarker m = set.createAreaMarker(markerid, e.toString(), false, e.getWorld().getName(), x, z, false);
       m.setCornerLocations(x, z);
       m.setLabel(e.toString());
-      String desc = "<div class=\"infowindow\"><span style=\"font-size:120%;\"><b>"+e.toString()+"</b></span><br /> "+msg.get("raw_nation", false)+": "+(e.isOccupied() ? e.getNation().toString() : msg.get("raw_not_claimed", false))+"";
+      String desc = "<div class=\"infowindow\"><span style=\"font-size:120%;\"><b>"+e.toString()+"</b></span><br /> "
+      +msg.get("raw_nation", false)+": "+(e.isOccupied() ? e.getNation().toString() : msg.get("raw_not_claimed", false))+"";
       if (!e.getDescription().isEmpty()) {
         for (String line : e.getDescription()) {
           desc += line+"<br />";

@@ -1,15 +1,22 @@
 package com.github.Dagrond.Commands;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
+import com.github.Dagrond.Nation.Estate;
 import com.github.Dagrond.Nation.Nation;
 import com.github.Dagrond.Nation.NationMember;
 import com.github.Dagrond.Utils.ConfigLoader;
 import com.github.Dagrond.Utils.msg;
+import com.sk89q.worldguard.bukkit.WGBukkit;
+import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 
 public class NationCommand implements CommandExecutor {
@@ -33,9 +40,9 @@ public class NationCommand implements CommandExecutor {
             if (args[1].equalsIgnoreCase("nation") || args[1].equalsIgnoreCase("n")) {
               if (args[2].equalsIgnoreCase("create")) {
                 if (args.length > 3) {
-                  if (!Nation.isNation(args[2])) {
-                    new Nation(args[2], config);
-                    sender.sendMessage(msg.get("nation_created", true, args[2]));
+                  if (!Nation.isNation(args[3])) {
+                    new Nation(args[3], config);
+                    sender.sendMessage(msg.get("nation_created", true, args[3]));
                   } else
                     sender.sendMessage(msg.get("error_nation_exist", true, args[2]));
                 } else
@@ -146,17 +153,79 @@ public class NationCommand implements CommandExecutor {
             } else if (args[1].equalsIgnoreCase("estate") || args[1].equalsIgnoreCase("e")) {
               if (args.length > 2) {
                 if (args[2].equalsIgnoreCase("info")) {
-                  
+                  if (args.length > 3) {
+                    if (Estate.isEstate(args[3])) {
+                      Estate estate = Estate.getEstate(args[3]);
+                      sender.sendMessage(msg.get("estate_info", true, (estate.getNation() != null ? estate.getNation().getMCcolor() : ChatColor.GRAY)+args[3]));
+                      sender.sendMessage(msg.get("estate_info_nation", false, (estate.getNation() != null ? estate.getNation().getDisplayName() : msg.get("raw_not_claimed", false))));
+                      sender.sendMessage(msg.get("estate_info_region", false, estate.getRegion().toString(), estate.getWorld().getName()));
+                      Location loc = estate.getSpawn();
+                      sender.sendMessage(msg.get("estate_info_spawn", false, msg.get("loc", false, Double.toString(loc.getX()), Double.toString(loc.getY()), Double.toString(loc.getZ()), loc.getWorld().getName())));
+                      sender.sendMessage("todo...");
+                    } else
+                      sender.sendMessage(msg.get("error_estate_not_exist", true, args[3]));
+                  } else
+                    sender.sendMessage(msg.get("error_usage", true, "/n a e info (nazwa)"));
                 } else if (args[2].equalsIgnoreCase("list")) {
-                  
+                  sender.sendMessage(msg.get("estates_list", true, Estate.getFullList()));
                 } else if (args[2].equalsIgnoreCase("add")) {
-                  
+                  if (sender instanceof Player) {
+                    if (args.length > 4) {
+                      if (!Estate.isEstate(args[3])) {
+                        Player player = (Player) sender;
+                        ProtectedRegion region = config.getWorldGuard().getRegionManager(player.getWorld()).getRegion(args[4]);
+                        if (region != null) {
+                          if (region instanceof ProtectedPolygonalRegion) {
+                            Location loc = player.getLocation();
+                            if (WGBukkit.getRegionManager(loc.getWorld()).getApplicableRegions(loc).getRegions().contains(region)) {
+                              new Estate(args[3], loc, (ProtectedPolygonalRegion) region, config);
+                              sender.sendMessage(msg.get("estate_created", true, args[3], args[4], player.getWorld().getName(),
+                              msg.get("loc", false, Double.toString(loc.getX()), Double.toString(loc.getY()), Double.toString(loc.getZ()), loc.getWorld().getName())));
+                            } else 
+                              sender.sendMessage(msg.get("error_not_in_region" , true, args[3]));
+                          } else 
+                            sender.sendMessage(msg.get("error_no_polygonal", true, args[4], player.getWorld().getName()));
+                        } else
+                          sender.sendMessage(msg.get("error_no_region", true, args[4], player.getWorld().getName()));
+                      } else
+                        sender.sendMessage(msg.get("error_already_estate", true, args[3]));
+                    } else
+                      sender.sendMessage(msg.get("error_usage", true, "/n a e add (nazwa) (region)"));
+                  } else
+                    sender.sendMessage(msg.get("error_must_be_a_player", true));
                 } else if (args[2].equalsIgnoreCase("del")) {
-                  
+                  if (args.length > 3) {
+                    if (Estate.isEstate(args[3])) {
+                      Estate.getEstate(args[3]).delete();
+                      sender.sendMessage(msg.get("estate_deleted", true, args[3]));
+                    } else
+                      sender.sendMessage(msg.get("error_estate_not_exist", true, args[3]));
+                  } else
+                    sender.sendMessage(msg.get("error_usage", true, "/n a e del (nazwa)"));
                 } else if (args[2].equalsIgnoreCase("give")) {
-                  
+                  if (args.length > 4) {
+                    if (Estate.isEstate(args[3])) {
+                      if (Nation.isNation(args[4])) {
+                        Estate estate = Estate.getEstate(args[3]);
+                        Nation nation = Nation.getNationByString(args[4]);
+                        if (!nation.estateBelongs(estate)) {
+                          if (estate.getNation() != null) {
+                            sender.sendMessage(msg.get("error_estate_belongs_to_other_nation", true, args[3], estate.getNation().getDisplayName()));
+                            estate.clearAffiliation();
+                          }
+                          nation.addEstate(estate);
+                          estate.setNation(nation);
+                          sender.sendMessage(msg.get("estate_joined_nation", true, args[3], nation.getDisplayName()));
+                        } else
+                          sender.sendMessage(msg.get("error_estate_already_belongs", true, args[3], nation.getDisplayName()));
+                      } else
+                        sender.sendMessage(msg.get("error_not_a_nation", true, args[4]));
+                    } else 
+                      sender.sendMessage(msg.get("error_estate_not_exist", true, args[3]));
+                  } else
+                    sender.sendMessage(msg.get("error_usage", true, "/n a e give (prowincja) (panstwo)"));
                 } else
-                  sender.sendMessage(msg.get("error_usage", true, "/n help adm"));
+                  sender.sendMessage(msg.get("error_usage", true, "/n help admin"));
               } else
                 sender.sendMessage(msg.get("error_usage", true, "/n a e info/list/add/del/give <nazwa>"));
             } else if (args[1].equalsIgnoreCase("member") || args[1].equalsIgnoreCase("m")) {
@@ -169,6 +238,11 @@ public class NationCommand implements CommandExecutor {
           sender.sendMessage(msg.get("error_usage", true, "/n help admin"));
       } else if (args[0].equalsIgnoreCase("ban")) {
         sender.sendMessage("todo...");
+      } else if (args[0].equalsIgnoreCase("help")) {
+        sender.sendMessage(">pluginy Oskara");
+        sender.sendMessage(">jakas strona pomocy na kiju");
+      } else {
+        sender.sendMessage(msg.get("error_usage", true, "/n help"));
       }
     }
   return true;

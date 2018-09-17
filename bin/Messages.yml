@@ -13,7 +13,7 @@ error_variable_color: "&4&l"
 #You can also use standard minecraft colors (&1, &2, &c, etc.), but it's better to use colors section (so you don't have to edit all messages when you want to change colors)
 
 #messages
-console_loaded: "Pomyslnie zaladowano %1 panstw, %2 prowincji, i %4 graczy!"
+console_loaded: "Pomyslnie zaladowano %1 panstw i %2 prowincji!"
 reloaded: "Pomyslnie przeladowano plugin!"
 nation_created: "Pomyslnie utworzyles frakcje %1 z graczem %2 jako generalem!"
 nation_list: "Panstwa (%1): %2"
@@ -27,6 +27,14 @@ nation_info_estates: "Lenna(%1): %2"
 nation_info_enemies: "Wrogowie: %1 (Wpisz %s/n enemylist <panstwo>%n aby wyswietlic liste wrogow panstwa)"
 nation_info_colors: "Kolor panstwa na mapie: %1, kolor w grze: %2"
 nation_king_setted: "Pomyslnie ustawiono gracza %1 jako krola panstwa %2!"
+estate_created: "Pomyslnie stworzono Prowincje o nazwie %1 z regionem %2 w swiecie %3. Lokacja spawnu prownicji: %3"
+estates_list: "Lista wszystkich prowincji: %1"
+estate_info: "Informacje o prowincji %1:"
+estate_info_nation: "Panstwo: %1"
+estate_info_region: "Region WG: %1 w swiecie %2"
+estate_info_spawn: "Spawn: %1"
+estate_deleted: "Pomyslnie usunieto prowincje %1!"
+estate_joined_nation: "Prowincja %1 zostala pomyslnie dolaczona do panstwa %2!"
 
 #error messages
 error_console_no_region: "Nie mozna zaladowac prowincji %1, poniewaz region %2 w swiecie %3 nie istnieje!"
@@ -36,6 +44,7 @@ error_console_nation_without_capital: "Panstwo %1 nie ma ustawionej stolicy!"
 error_console_nation_without_king: "Panstwo %1 nie posiada krola!"
 error_permission: "Nie posiadasz odpowiednich uprawnien aby uzyc tej komendy!"
 error_usage: "Poprawne uzycie: %1"
+error_estate_not_exist: "Prowincja o nazwie %1 nie istnieje!"
 error_nation_exist: "Panstwo %1 juz istnieje!"
 error_not_a_nation: "Panstwo %1 nie istnieje!"
 error_king_has_to_played_before: "Aby gracz %1 zostal krolem, musi chociaz raz wejsc na serwer!"
@@ -45,6 +54,13 @@ error_king_in_other_nation: "Gracz %1 nalezy do panstwa %2! Aby zostac krolem, m
 error_already_king: "Gracz %1 jest juz krolem!"
 error_already_assistant: "Gracz %1 jest juz asystentem krola lub krolem!"
 error_assistant_in_other_nation: "Gracz %1 nie nalezy do panstwa %2!"
+error_already_estate: "Prowincja %1 juz istnieje!"
+error_must_be_a_player: "Aby to zrobic musisz byc graczem!"
+error_no_region: "Region %1 nie istnieje na swiecie %2!"
+error_no_polygonal: "Region %1 w swiecie %2 musi byc wielokatem aby stac sie prowincja!"
+error_not_in_region: "Aby utworzyc prowincje musisz znajdowac sie w obrebie jej granic! (W miejscu w ktorym stoisz zostanie utworzony spawn prowincji."
+error_estate_already_belongs: "Prowincja %1 nalezy juz do panstwa %2!"
+error_estate_belongs_to_other_nation: "Prowincja %1 nalezy juz do panstwa %2! Usuwanie zaleznosci..."
 
 #help pages
 
