@@ -5,8 +5,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
 public class RespawnEvent implements Listener {
-  
-  @EventHandler
-  public void onRespawn(PlayerRespawnEvent e) {
-  }
+
+	@EventHandler
+	public void onRespawn(PlayerRespawnEvent e) {
+	}
 }
