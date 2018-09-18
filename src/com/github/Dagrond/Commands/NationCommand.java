@@ -282,7 +282,9 @@ public class NationCommand implements CommandExecutor {
 								sender.sendMessage(
 										msg.get("error_usage", true, "/n a e info/list/add/del/give <nazwa>"));
 						} else if (args[1].equalsIgnoreCase("member") || args[1].equalsIgnoreCase("m")) {
-
+						  if (args[2].equalsIgnoreCase("list")) {
+						    
+						  }
 						} else
 							sender.sendMessage(msg.get("error_usage", true, "/n help admin"));
 					} else

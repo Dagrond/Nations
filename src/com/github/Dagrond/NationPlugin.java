@@ -49,7 +49,7 @@ public final class NationPlugin extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(new onAsyncPlayerChatEvent(chat), this);
 		getServer().getPluginManager().registerEvents(new OnDeathEvent(), this);
 		getServer().getPluginManager().registerEvents(new RespawnEvent(), this);
-		getServer().getPluginManager().registerEvents(new onJoin(), this);
+		getServer().getPluginManager().registerEvents(new onJoin(config), this);
 		getServer().getPluginManager().registerEvents(new onLeave(), this);
 		this.setupPermissions();
 		this.setupChat();

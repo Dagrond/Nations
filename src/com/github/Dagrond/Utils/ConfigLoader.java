@@ -199,8 +199,7 @@ public class ConfigLoader {
 
 	public void saveNationMember(NationMember player) {
 		if (!isLoading) {
-			new File(plugin.getDataFolder() + String.valueOf(File.separatorChar) + "Players", player.getUUID() + ".yml")
-					.delete();
+			new File(plugin.getDataFolder() + String.valueOf(File.separatorChar) + "Players", player.getUUID() + ".yml").delete();
 			ConfigAccessor ca = new ConfigAccessor(plugin, player.getUUID() + ".yml", "Players");
 			ConfigurationSection cs = ca.getConfig();
 			if (player.getNation() != null)

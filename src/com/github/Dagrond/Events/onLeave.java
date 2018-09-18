@@ -6,6 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.github.Dagrond.Nation.Nation;
+import com.github.Dagrond.Nation.NationMember;
 
 public class onLeave implements Listener {
   
@@ -16,5 +17,6 @@ public class onLeave implements Listener {
 	  if (nation != null) {
   	  nation.delOnlineMember(player);
 	  }
+	  NationMember.delOnlineMember(NationMember.getNationMember(player.getUniqueId()));
 	}
 }

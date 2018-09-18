@@ -21,12 +21,6 @@ public class onAsyncPlayerChatEvent implements Listener {
 	@EventHandler
 	public void onChat(AsyncPlayerChatEvent e) {
 		e.setCancelled(true);
-		/*
-		 * message that is send to players (including nation prefix, name, permission
-		 * prefix and proper message) at this state, there's only permission prefix,
-		 * display name and permission suffix Nation prefix is added at the beginning of
-		 * the string, and message that player sent - at the end of string
-		 */
 		Player player = e.getPlayer();
 		String msg = chat.getPlayerPrefix(player)+player.getDisplayName()+chat.getPlayerSuffix(player)+" ";
 		if (e.getMessage().startsWith("!")) {
@@ -37,8 +31,7 @@ public class onAsyncPlayerChatEvent implements Listener {
 			  Bukkit.broadcast(msg, "Nations.isOP");
 			  return;
 			} else if (player.isOp()) {
-			  msg = msg.substring(1, msg.length());
-			  Bukkit.broadcastMessage(msg);
+			  Bukkit.broadcastMessage(msg.substring(1, msg.length()));
 			  return;
 			}
 		}
@@ -48,6 +41,6 @@ public class onAsyncPlayerChatEvent implements Listener {
 				entity.sendMessage(msg);
 			}
 		}
-
+		Bukkit.broadcast("[l] "+msg, "Nations.isOP");
 	}
 }
