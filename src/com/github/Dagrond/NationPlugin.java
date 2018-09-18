@@ -12,6 +12,8 @@ import com.github.Dagrond.Commands.NationCommand;
 import com.github.Dagrond.Events.OnDeathEvent;
 import com.github.Dagrond.Events.RespawnEvent;
 import com.github.Dagrond.Events.onAsyncPlayerChatEvent;
+import com.github.Dagrond.Events.onJoin;
+import com.github.Dagrond.Events.onLeave;
 import com.github.Dagrond.Utils.ConfigLoader;
 import com.github.Dagrond.Utils.msg;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -47,6 +49,8 @@ public final class NationPlugin extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(new onAsyncPlayerChatEvent(chat), this);
 		getServer().getPluginManager().registerEvents(new OnDeathEvent(), this);
 		getServer().getPluginManager().registerEvents(new RespawnEvent(), this);
+		getServer().getPluginManager().registerEvents(new onJoin(), this);
+		getServer().getPluginManager().registerEvents(new onLeave(), this);
 		this.setupPermissions();
 		this.setupChat();
 		// load plugin

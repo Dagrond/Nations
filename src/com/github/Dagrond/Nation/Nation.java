@@ -12,6 +12,8 @@ import com.github.Dagrond.Utils.msg;
 import com.sk89q.worldguard.bukkit.WGBukkit;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
+import fr.xephi.authme.api.v3.AuthMeApi;
+
 /*
  *  Nation class
  *  this stores all information about certain nation
@@ -28,7 +30,8 @@ public class Nation {
 	private int HEXcolor = 0xFF0000; // HEX color of nation on dynmap
 	private ChatColor MCcolor = ChatColor.GRAY; // minecraft color of nation
 	private HashSet<UUID> bannedPlayers = new HashSet<>(); // players who are enemies of this nation
-	private HashSet<UUID> members = new HashSet<>(); // list of members of current nation
+	private HashSet<UUID> members = new HashSet<>(); // list of all members of nation
+	private HashSet<Player> onlineMembers = new HashSet<>(); // online members of this nation
 
 	public Nation(String name, ConfigLoader config) {
 		this.name = name;
@@ -41,10 +44,27 @@ public class Nation {
 		config.saveNation(this);
 	}
 
+	public void broadcastToOnlineMembers(String msg) {
+	  AuthMeApi api = AuthMeApi.getInstance();
+	  for (Player member : onlineMembers) {
+	    if (api.isAuthenticated(member)) {
+	      if (!member.hasPermission("Nations.isOP"))
+	        member.sendMessage(msg);
+	    }
+	  }
+	}
 	// setters
 	public void setKing(UUID king) {
 		this.king = king;
 		save();
+	}
+	
+	public void addOnlineMember(Player player) {
+	  onlineMembers.add(player);
+	}
+	
+	public void delOnlineMember(Player player) {
+	  onlineMembers.remove(player);
 	}
 
 	public void setHEXColor(int HEXcolor) {
@@ -89,6 +109,12 @@ public class Nation {
 
 	public void delMember(UUID member) {
 		members.remove(member);
+		for (Player player : onlineMembers) {
+		  if (player.getUniqueId().equals(member)) {
+		    onlineMembers.remove(player);
+		    break;
+		  }
+		}
 		assistants.remove(member);
 		if (king.equals(member))
 			king = null;

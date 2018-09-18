@@ -2,7 +2,7 @@ name: Nations
 main: com.github.Dagrond.NationPlugin
 version: 0.1
 softdepend: [AdminTools, Multiverse-Core]
-depend: [WorldGuard, Vault]
+depend: [WorldGuard, Vault, AuthMe]
 commands:
    Nation:
       aliases: [n]

@@ -1,5 +1,6 @@
 package com.github.Dagrond.Events;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -31,7 +32,14 @@ public class onAsyncPlayerChatEvent implements Listener {
 		if (e.getMessage().startsWith("!")) {
 			Nation nation = Nation.getPlayerNation(player);
 			if (nation != null && Nation.isInOwn(player)) {
-			  msg = "["+nation.getDisplayName()+"] "+msg;
+			  msg = "["+nation.getDisplayName()+"] "+msg.substring(1, msg.length());
+			  nation.broadcastToOnlineMembers(msg);
+			  Bukkit.broadcast(msg, "Nations.isOP");
+			  return;
+			} else if (player.isOp()) {
+			  msg = msg.substring(1, msg.length());
+			  Bukkit.broadcastMessage(msg);
+			  return;
 			}
 		}
 		// send message to 100 nearest player
