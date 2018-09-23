@@ -35,6 +35,9 @@ estate_info_region: "Region WG: %1 w swiecie %2"
 estate_info_spawn: "Spawn: %1"
 estate_deleted: "Pomyslnie usunieto prowincje %1!"
 estate_joined_nation: "Prowincja %1 zostala pomyslnie dolaczona do panstwa %2!"
+online_member_list: "<Debug> Lista graczy online: %1"
+added_to_nation: "Pomyslnie dodano gracza %1 do panstwa %2!"
+joined_nation: "Dolaczyles do panstwa %1!"
 
 #error messages
 error_console_no_region: "Nie mozna zaladowac prowincji %1, poniewaz region %2 w swiecie %3 nie istnieje!"
@@ -47,8 +50,7 @@ error_usage: "Poprawne uzycie: %1"
 error_estate_not_exist: "Prowincja o nazwie %1 nie istnieje!"
 error_nation_exist: "Panstwo %1 juz istnieje!"
 error_not_a_nation: "Panstwo %1 nie istnieje!"
-error_king_has_to_played_before: "Aby gracz %1 zostal krolem, musi chociaz raz wejsc na serwer!"
-error_ass_has_to_played_before: "Aby gracz %1 zostal asystentem, musi chociaz raz wejsc na serwer!"
+error_has_to_played_before: "Aby tego dokonac, gracz %1 musi chociaz raz zalogowac sie na serwerze!"
 error_king_not_in_nation: "Gracz %1 nie byl w panstwie %2! Dodano go do tego panstwa."
 error_king_in_other_nation: "Gracz %1 nalezy do panstwa %2! Aby zostac krolem, musi byc bezpanstwowy lub nalezec do panstwa, ktorego krolem ma zostac."
 error_already_king: "Gracz %1 jest juz krolem!"
@@ -61,6 +63,8 @@ error_no_polygonal: "Region %1 w swiecie %2 musi byc wielokatem aby stac sie pro
 error_not_in_region: "Aby utworzyc prowincje musisz znajdowac sie w obrebie jej granic! (W miejscu w ktorym stoisz zostanie utworzony spawn prowincji."
 error_estate_already_belongs: "Prowincja %1 nalezy juz do panstwa %2!"
 error_estate_belongs_to_other_nation: "Prowincja %1 nalezy juz do panstwa %2! Usuwanie zaleznosci..."
+error_already_in_nation: "Gracz %1 nalezy juz do panstwa %2! Aby to zrobic, gracz musi byc bezpanstwowy."
+error_not_in_own_nation: "Nie jestes na terenie swojego panstwa! Wiadomosc zostala wyslana do graczy w obrebie 100 kratek."
 
 #help pages
 

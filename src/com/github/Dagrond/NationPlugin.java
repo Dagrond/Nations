@@ -14,8 +14,11 @@ import com.github.Dagrond.Events.RespawnEvent;
 import com.github.Dagrond.Events.onAsyncPlayerChatEvent;
 import com.github.Dagrond.Events.onJoin;
 import com.github.Dagrond.Events.onLeave;
+import com.github.Dagrond.Nation.Estate;
+import com.github.Dagrond.Nation.Nation;
+import com.github.Dagrond.Nation.NationMember;
 import com.github.Dagrond.Utils.ConfigLoader;
-import com.github.Dagrond.Utils.msg;
+import com.github.Dagrond.Utils.Msg;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
 import net.milkbowl.vault.chat.Chat;
@@ -39,31 +42,34 @@ public final class NationPlugin extends JavaPlugin {
 	}
 
 	public void reload(CommandSender sender) {
-		// clear old data
+	 // clear old data
+	 NationMember.purge();
+	 Estate.purge();
+	 Nation.purge();
 	 if (!setupEconomy()) {
 	   this.getLogger().severe("Nie znaleziono Vault!");
      Bukkit.getPluginManager().disablePlugin(this);
      return;
 	  }
+    Plugin wg = getServer().getPluginManager().getPlugin("WorldGuard");
+    if (!(wg == null || !(wg instanceof WorldGuardPlugin)))
+      worldGuard = (WorldGuardPlugin) wg;
+    Plugin dm = getServer().getPluginManager().getPlugin("dynmap");
+    if (!(dm == null || !(dm instanceof DynmapAPI)))
+      dynmap = (DynmapAPI) dm;
+	  config = new ConfigLoader(this, worldGuard);
+	  NationMember.updateConfig(config);
 		HandlerList.unregisterAll(this);
-		getServer().getPluginManager().registerEvents(new onAsyncPlayerChatEvent(chat), this);
+		getServer().getPluginManager().registerEvents(new onAsyncPlayerChatEvent(), this);
 		getServer().getPluginManager().registerEvents(new OnDeathEvent(), this);
 		getServer().getPluginManager().registerEvents(new RespawnEvent(), this);
 		getServer().getPluginManager().registerEvents(new onJoin(config), this);
 		getServer().getPluginManager().registerEvents(new onLeave(), this);
 		this.setupPermissions();
 		this.setupChat();
-		// load plugin
-		Plugin wg = getServer().getPluginManager().getPlugin("WorldGuard");
-		if (!(wg == null || !(wg instanceof WorldGuardPlugin)))
-			worldGuard = (WorldGuardPlugin) wg;
-		Plugin dm = getServer().getPluginManager().getPlugin("dynmap");
-		if (!(dm == null || !(dm instanceof DynmapAPI)))
-			dynmap = (DynmapAPI) dm;
-		config = new ConfigLoader(this, worldGuard);
 		getCommand("Nation").setExecutor(new NationCommand(config));
 		if (sender != null)
-			sender.sendMessage(msg.get("reloaded", true));
+			sender.sendMessage(Msg.get("reloaded", true));
 	}
 
 	public DynmapAPI getDynmap() {
@@ -82,12 +88,14 @@ public final class NationPlugin extends JavaPlugin {
   }
   private boolean setupChat() {
     RegisteredServiceProvider<Chat> rsp = getServer().getServicesManager().getRegistration(Chat.class);
-    chat = rsp.getProvider();
+    if (rsp != null) 
+      chat = rsp.getProvider();
     return chat != null;
   }
   private boolean setupPermissions() {
     RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
-    perms = rsp.getProvider();
+    if (rsp != null)
+      perms = rsp.getProvider();
     return perms != null;
   }
   public Economy getEcononomy() {

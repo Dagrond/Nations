@@ -1,9 +1,12 @@
 package com.github.Dagrond.Events;
 
+import java.util.UUID;
+
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 
 import com.github.Dagrond.Nation.Nation;
 import com.github.Dagrond.Nation.NationMember;
@@ -17,14 +20,15 @@ public class onJoin implements Listener {
   }
   
 	@EventHandler
-	public void onLogin(PlayerLoginEvent e) {
+	public void onLogin(PlayerJoinEvent e) {
 	  Player player = e.getPlayer();
-	  if (config.loadMember(player.getUniqueId()) == null) {
-	    NationMember member = new NationMember(player.getUniqueId());
+	  UUID uuid = player.getUniqueId();
+	  /* dupa debug */ if (uuid == null) Bukkit.getLogger().info("dupa");;
+	  if (config.isSavedMember(uuid)) {
+	    NationMember member = new NationMember(uuid);
 	    config.saveNationMember(member);
-	    NationMember.addOnlineMember(member);
 	  } else {
-	    NationMember.addOnlineMember(config.loadMember(player.getUniqueId()));
+	    NationMember.addOnlineMember(config.loadMember(uuid));
 	  }
 	  Nation nation = Nation.getPlayerNation(player);
 	  if (nation != null) {

@@ -3,8 +3,10 @@ package com.github.Dagrond.Nation;
 import java.util.HashSet;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
+
 import com.github.Dagrond.Utils.ConfigLoader;
-import com.github.Dagrond.Utils.msg;
+import com.github.Dagrond.Utils.Msg;
 
 public class NationMember {
 
@@ -20,8 +22,7 @@ public class NationMember {
 		JAIL, KICK, BAN, PERMISSION_VIEW, PERMISSION_MANAGE; // todo: a lot of perms
 	}
 
-	private static HashSet<NationMember> members = new HashSet<>(); // NationMember instances of currently online
-																	// players
+	private static HashSet<NationMember> members = new HashSet<>(); // NationMember instances of currently online players
 	private static ConfigLoader config;
 	private UUID player; // UUID of current member
 	private Nation nation = null; // nation of this player
@@ -30,6 +31,7 @@ public class NationMember {
 
 	public NationMember(UUID player) {
 		this.player = player;
+		addOnlineMember(this);
 	}
 
 	public void save() {
@@ -85,6 +87,11 @@ public class NationMember {
 	}
 
 	// getters
+	@Override
+	public String toString() {
+	  return Bukkit.getOfflinePlayer(player).getName();
+	}
+	
 	public UUID getUUID() {
 		return player;
 	}
@@ -105,7 +112,7 @@ public class NationMember {
 		if (!list.equalsIgnoreCase(""))
 			return list.substring(0, list.length() - 2);
 		else
-			return msg.get("none", false);
+			return Msg.get("none", false);
 	}
 
 	public HashSet<NationPerm> getPermissions() {
@@ -114,7 +121,24 @@ public class NationMember {
 
 	// Static
 	public static void addOnlineMember(NationMember member) {
-		members.add(member);
+		if (!members.contains(member))
+		  members.add(member);
+	}
+	
+	public static String getOnlineMembersList() {
+	  String list = "";
+	  for (NationMember member : members) {
+	    if (member == null) Bukkit.getLogger().info("DUPAAAAAAAAAA");
+	    list += member.toString() + ", ";
+	  }
+	  if (!list.equalsIgnoreCase(""))
+	    return list.substring(0, list.length() - 2);
+	  else
+	    return Msg.get("none", false);
+	}
+	
+	public static void purge() {
+	  members.clear();
 	}
 
 	public static void delOnlineMember(NationMember member) {

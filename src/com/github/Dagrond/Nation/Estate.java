@@ -8,7 +8,7 @@ import org.bukkit.World;
 
 import com.github.Dagrond.Utils.ConfigLoader;
 import com.github.Dagrond.Utils.DynmapUpdater;
-import com.github.Dagrond.Utils.msg;
+import com.github.Dagrond.Utils.Msg;
 import com.sk89q.worldguard.bukkit.WGBukkit;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
@@ -138,6 +138,10 @@ public class Estate {
 		return getEstate(estate) != null;
 	}
 
+	public static void purge() {
+	  estates.clear();
+	}
+	
 	public static String getFullList() {
 		String list = "";
 		for (Estate estate : estates) {
@@ -147,7 +151,7 @@ public class Estate {
 		if (!list.equalsIgnoreCase(""))
 			return list.substring(0, list.length() - 2);
 		else
-			return msg.get("none", false);
+			return Msg.get("none", false);
 	}
 
 	public static Estate getEstate(String estate) {

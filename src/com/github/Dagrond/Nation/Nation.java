@@ -8,7 +8,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import com.github.Dagrond.Utils.ConfigLoader;
-import com.github.Dagrond.Utils.msg;
+import com.github.Dagrond.Utils.Msg;
 import com.sk89q.worldguard.bukkit.WGBukkit;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
@@ -233,7 +233,7 @@ public class Nation {
 		if (!list.equalsIgnoreCase(""))
 			return list.substring(0, list.length() - 2);
 		else
-			return msg.get("none", false);
+			return Msg.get("none", false);
 	}
 
 	public String getBannedList() {
@@ -244,7 +244,7 @@ public class Nation {
 		if (!list.equalsIgnoreCase(""))
 			return list.substring(0, list.length() - 2);
 		else
-			return msg.get("none", false);
+			return Msg.get("none", false);
 	}
 
 	public String getAssistantsList() {
@@ -255,7 +255,7 @@ public class Nation {
 		if (!list.equalsIgnoreCase(""))
 			return list.substring(0, list.length() - 2);
 		else
-			return msg.get("none", false);
+			return Msg.get("none", false);
 	}
 
 	public String getEstatesList() {
@@ -266,7 +266,7 @@ public class Nation {
 		if (!list.equalsIgnoreCase(""))
 			return list.substring(0, list.length() - 2);
 		else
-			return msg.get("none", false);
+			return Msg.get("none", false);
 	}
 
 	// Static methods
@@ -291,7 +291,6 @@ public class Nation {
 	}
 
 	public static boolean isInOwn(Player player) {
-
 		return false;
 	}
 
@@ -304,15 +303,19 @@ public class Nation {
 		return null;
 	}
 
+	public static void purge() {
+	  nations.clear();
+	}
+	
 	public static String getNationsList() {
 		String list = "";
 		for (Nation nation : nations) {
-			list += nation.getMCcolor() + nation.toString() + ", ";
+			list += nation.getDisplayName() + ", ";
 		}
 		if (!list.equalsIgnoreCase(""))
 			return list.substring(0, list.length() - 2);
 		else
-			return msg.get("none", false);
+			return Msg.get("none", false);
 	}
 
 }

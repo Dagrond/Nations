@@ -3,7 +3,7 @@ package com.github.Dagrond.Utils;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 
-public class msg {
+public class Msg {
 
 	private static ConfigurationSection msg;
 

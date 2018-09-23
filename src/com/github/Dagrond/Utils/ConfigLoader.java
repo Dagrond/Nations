@@ -34,7 +34,7 @@ public class ConfigLoader {
 		this.worldGuard = worldGuard;
 		msgAccessor = new ConfigAccessor(plugin, "Messages.yml");
 		msgAccessor.saveDefaultConfig();
-		msg.set(msgAccessor.getConfig());
+		Msg.set(msgAccessor.getConfig());
 		loadAll();
 	}
 
@@ -46,9 +46,8 @@ public class ConfigLoader {
 		int loadedMembers = 0;
 
 		// loading estates
-		if (new File(plugin.getDataFolder().getAbsolutePath() + File.separatorChar + "Estates").exists()) {
-			for (File file : new File(plugin.getDataFolder().getAbsolutePath() + File.separatorChar + "Estates")
-					.listFiles()) {
+		if (new File(plugin.getDataFolder() + String.valueOf(File.separatorChar) + "Estates").exists()) {
+			for (File file : new File(plugin.getDataFolder() + String.valueOf(File.separatorChar) + "Estates").listFiles()) {
 				FileConfiguration cs = YamlConfiguration.loadConfiguration(file);
 				String name = file.getName();
 				name = name.substring(0, name.length() - 4); // remove the .yml
@@ -68,23 +67,22 @@ public class ConfigLoader {
 								e.addLore(lore);
 						++loadedEstates;
 					} else {
-						Bukkit.getLogger().info(msg.get("error_console_no_region", true, name, cs.getString("region"),
+						Bukkit.getLogger().info(Msg.get("error_console_no_region", true, name, cs.getString("region"),
 								cs.getString("spawn.world")));
 					}
 				} else {
-					Bukkit.getLogger().info(msg.get("error_console_no_world", true, name, cs.getString("spawn.world")));
+					Bukkit.getLogger().info(Msg.get("error_console_no_world", true, name, cs.getString("spawn.world")));
 				}
 			}
 		}
 		// loading nations
-		if (new File(plugin.getDataFolder().getAbsolutePath() + File.separatorChar + "Nations").exists()) {
-			for (File file : new File(plugin.getDataFolder().getAbsolutePath() + File.separatorChar + "Nations")
-					.listFiles()) {
+		if (new File(plugin.getDataFolder() + String.valueOf(File.separatorChar) + "Nations").exists()) {
+			for (File file : new File(plugin.getDataFolder() + String.valueOf(File.separatorChar) + "Nations").listFiles()) {
 				FileConfiguration cs = YamlConfiguration.loadConfiguration(file);
 				String name = file.getName();
 				name = name.substring(0, name.length() - 4); // remove the .yml
 				Nation nation = new Nation(name, this);
-				nation.setHEXColor(Integer.parseInt(cs.getString("hexolor").substring(1), 16));
+				nation.setHEXColor(Integer.parseInt(cs.getString("hexcolor").substring(1), 16));
 				nation.setMCcolor(ChatColor.valueOf(cs.getString("mcolor")));
 				if (cs.isList("bannedplayers")) {
 					for (String uuid : cs.getStringList("bannedplayers")) {
@@ -96,7 +94,7 @@ public class ConfigLoader {
 					if (cs.isString("capital")) {
 						capital = cs.getString("capital");
 					} else {
-						Bukkit.getLogger().info(msg.get("error_console_nation_without_capital", true, name));
+						Bukkit.getLogger().info(Msg.get("error_console_nation_without_capital", true, name));
 					}
 					for (String estate : cs.getStringList("estates")) {
 						Estate e = Estate.getEstate(estate);
@@ -106,14 +104,14 @@ public class ConfigLoader {
 							if (capital.equals(estate))
 								nation.setCapital(e);
 						} else {
-							Bukkit.getLogger().info(msg.get("error_console_estate_not_loaded", true, estate, name));
+							Bukkit.getLogger().info(Msg.get("error_console_estate_not_loaded", true, estate, name));
 						}
 					}
 				}
 				if (cs.isString("king"))
 					nation.setKing(UUID.fromString(cs.getString("king")));
 				else
-					Bukkit.getLogger().info(msg.get("error_console_nation_without_king", true, name));
+					Bukkit.getLogger().info(Msg.get("error_console_nation_without_king", true, name));
 				if (cs.isList("assistants"))
 					for (String assistant : cs.getStringList("assistants"))
 						nation.addAssistant(UUID.fromString(assistant));
@@ -129,17 +127,22 @@ public class ConfigLoader {
 		}
 		isLoading = false;
 		new DynmapUpdater(plugin);
-		Bukkit.getLogger().info(msg.get("console_loaded", true, Integer.toString(loadedNations),
+		Bukkit.getLogger().info(Msg.get("console_loaded", true, Integer.toString(loadedNations),
 				Integer.toString(loadedEstates), Integer.toString(loadedMembers)));
 	}
 
+	public boolean isSavedMember(UUID uuid) {
+	  return new File(plugin.getDataFolder() + String.valueOf(File.separatorChar) + "Players", uuid.toString() + ".yml").isFile();
+	}
+	
 	public NationMember loadMember(UUID uuid) {
-		File memberfile = new File(
-				plugin.getDataFolder() + String.valueOf(File.separatorChar) + "Players" + uuid.toString() + ".yml");
+	  File memberfile = new File(plugin.getDataFolder() + String.valueOf(File.separatorChar) + "Players", uuid.toString() + ".yml");
 		NationMember member = null;
-		if (memberfile.exists()) {
+		if (memberfile.isFile()) {
 			FileConfiguration cfg = YamlConfiguration.loadConfiguration(memberfile);
 			member = new NationMember(uuid);
+			if (Bukkit.getOfflinePlayer(uuid).isOnline())
+			  NationMember.addOnlineMember(member);
 			if (cfg.isString("nation"))
 				member.setNation(Nation.getNationByString(cfg.getString("nation")));
 			if (cfg.isInt("priority"))
@@ -155,8 +158,7 @@ public class ConfigLoader {
 
 	public void saveNation(Nation nation) {
 		if (!isLoading) {
-			new File(plugin.getDataFolder() + String.valueOf(File.separatorChar) + "Nations",
-					nation.toString() + ".yml").delete(); // delete old data
+			new File(plugin.getDataFolder() + String.valueOf(File.separatorChar) + "Nations", nation.toString() + ".yml").delete(); // delete old data
 			ConfigAccessor ca = new ConfigAccessor(plugin, nation.toString() + ".yml", "Nations");
 			ConfigurationSection cs = ca.getConfig();
 			if (nation.getKing() != null)
@@ -199,8 +201,9 @@ public class ConfigLoader {
 
 	public void saveNationMember(NationMember player) {
 		if (!isLoading) {
-			new File(plugin.getDataFolder() + String.valueOf(File.separatorChar) + "Players", player.getUUID() + ".yml").delete();
-			ConfigAccessor ca = new ConfigAccessor(plugin, player.getUUID() + ".yml", "Players");
+		  UUID uuid = player.getUUID();
+			new File(plugin.getDataFolder() + String.valueOf(File.separatorChar) + "Players", uuid + ".yml").delete();
+			ConfigAccessor ca = new ConfigAccessor(plugin, uuid + ".yml", "Players");
 			ConfigurationSection cs = ca.getConfig();
 			if (player.getNation() != null)
 				cs.set("nation", player.getNation().toString());
@@ -220,8 +223,7 @@ public class ConfigLoader {
 
 	public void saveEstate(Estate estate) {
 		if (!isLoading) {
-			new File(plugin.getDataFolder() + String.valueOf(File.separatorChar) + "Estates",
-					estate.toString() + ".yml").delete();
+			new File(plugin.getDataFolder() + String.valueOf(File.separatorChar) + "Estates", estate.toString() + ".yml").delete();
 			ConfigAccessor ca = new ConfigAccessor(plugin, estate.toString() + ".yml", "Estates");
 			ConfigurationSection cs = ca.getConfig();
 			cs.set("region", estate.getRegion().getId());
