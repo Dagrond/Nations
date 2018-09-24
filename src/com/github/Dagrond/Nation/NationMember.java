@@ -121,7 +121,7 @@ public class NationMember {
 
 	// Static
 	public static void addOnlineMember(NationMember member) {
-		if (!members.contains(member))
+		if (!members.contains(member) && Bukkit.getOfflinePlayer(member.getUUID()).isOnline())
 		  members.add(member);
 	}
 	

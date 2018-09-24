@@ -24,13 +24,13 @@ public class onAsyncPlayerChatEvent implements Listener {
   		Player player = e.getPlayer();
   		PermissionUser user = PermissionsEx.getUser(player);
   		String msg = user.getPrefix()+player.getDisplayName()+user.getSuffix();
+  		Nation nation = Nation.getPlayerNation(player);
   		if (message.startsWith("!")) {
-  			Nation nation = Nation.getPlayerNation(player);
   			if (nation != null && Nation.isInOwn(player)) {
   		     if (player.hasPermission("Nations.ChatColor")) 
-  		        msg = ChatColor.translateAlternateColorCodes('&', "["+nation.getDisplayName()+"] "+msg+message.substring(1, message.length()));
+  		        msg = ChatColor.translateAlternateColorCodes('&', "[n] "+msg+message);
   		      else
-  		        msg = ChatColor.translateAlternateColorCodes('&', "["+nation.getDisplayName()+"] "+msg)+message.substring(1, message.length());
+  		        msg = ChatColor.translateAlternateColorCodes('&', "[n] "+msg)+message;
   			  nation.broadcastToOnlineMembers(msg);
   			  Bukkit.broadcast(msg, "Nations.isOP");
   			  Bukkit.getLogger().info(msg);
@@ -44,17 +44,21 @@ public class onAsyncPlayerChatEvent implements Listener {
   			}
   		}
   		// send message to 100 nearest player
-  		if (player.hasPermission("Nations.ChatColor")) 
-  		  msg = ChatColor.translateAlternateColorCodes('&', msg+message);
-  		else
-  		  msg = ChatColor.translateAlternateColorCodes('&', msg)+message;
+  		if (player.hasPermission("Nations.ChatColor"))
+  		  if (player.isOp())
+  		    msg = ChatColor.translateAlternateColorCodes('&', msg+message);
+  		  else
+  		    msg = ChatColor.translateAlternateColorCodes('&', "["+(nation != null ? nation.getDisplayName() : Msg.get("raw_without_nation", false))+"] "+msg+message);
+      else
+        msg = ChatColor.translateAlternateColorCodes('&', "["+(nation != null ? nation.getDisplayName() : Msg.get("raw_without_nation", false))+"] "+msg)+message;
+  		msg = "[l] "+msg;
+  		if (!player.hasPermission("Nations.isOP"))
+  		  player.sendMessage(msg);
   		for (Entity entity : player.getNearbyEntities(100, 100, 100)) {
   			if (entity instanceof Player) {
   				entity.sendMessage(msg);
-  				player.sendMessage(msg);
   			}
   		}
-  		msg = "[l] "+msg;
   		Bukkit.broadcast(msg, "Nations.isOP");
   		Bukkit.getLogger().info(msg);
 	  }

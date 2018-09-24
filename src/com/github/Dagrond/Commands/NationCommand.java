@@ -306,12 +306,18 @@ public class NationCommand implements CommandExecutor {
 						        sender.sendMessage(Msg.get("error_has_to_played_before", true, args[3]));
 						    } else
 						      sender.sendMessage(Msg.get("error_usage", true, "/m a m add (gracz) (panstwo)"));
+						  } else if(args[2].equalsIgnoreCase("debug")) {
+						    if (sender instanceof Player) {
+						      NationMember m = new NationMember(((Player) sender).getUniqueId());
+						      sender.sendMessage(m.getUUID().toString());
+						      sender.sendMessage(Integer.toString(m.getPriority()));
+						    }
 						  } else
 						    sender.sendMessage(Msg.get("error_usage", true, "/n a m list/add/remove/info"));
 						} else
 							sender.sendMessage(Msg.get("error_usage", true, "/n help admin"));
 					} else
-						Msg.get("error_permission", true);
+						sender.sendMessage(Msg.get("error_permission", true));
 				} else
 					sender.sendMessage(Msg.get("error_usage", true, "/n help admin"));
 			} else if (args[0].equalsIgnoreCase("ban")) {

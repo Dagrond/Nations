@@ -83,7 +83,7 @@ public class ConfigLoader {
 				name = name.substring(0, name.length() - 4); // remove the .yml
 				Nation nation = new Nation(name, this);
 				nation.setHEXColor(Integer.parseInt(cs.getString("hexcolor").substring(1), 16));
-				nation.setMCcolor(ChatColor.valueOf(cs.getString("mcolor")));
+				nation.setMCcolor(ChatColor.getByChar(cs.getString("mcolor")));
 				if (cs.isList("bannedplayers")) {
 					for (String uuid : cs.getStringList("bannedplayers")) {
 						nation.addBannedPlayer(UUID.fromString(uuid));
@@ -121,7 +121,7 @@ public class ConfigLoader {
 				++loadedNations;
 				// loading nation members
 				for (Player player : Bukkit.getOnlinePlayers()) {
-					NationMember.addOnlineMember(loadMember(player.getUniqueId()));
+					loadMember(player.getUniqueId());
 				}
 			}
 		}
@@ -132,19 +132,20 @@ public class ConfigLoader {
 	}
 
 	public boolean isSavedMember(UUID uuid) {
-	  return new File(plugin.getDataFolder() + String.valueOf(File.separatorChar) + "Players", uuid.toString() + ".yml").isFile();
+	  return new File(plugin.getDataFolder() + String.valueOf(File.separatorChar) + "Players", uuid.toString() + ".yml").exists();
 	}
 	
 	public NationMember loadMember(UUID uuid) {
 	  File memberfile = new File(plugin.getDataFolder() + String.valueOf(File.separatorChar) + "Players", uuid.toString() + ".yml");
 		NationMember member = null;
-		if (memberfile.isFile()) {
+		if (memberfile.exists()) {
 			FileConfiguration cfg = YamlConfiguration.loadConfiguration(memberfile);
 			member = new NationMember(uuid);
-			if (Bukkit.getOfflinePlayer(uuid).isOnline())
-			  NationMember.addOnlineMember(member);
-			if (cfg.isString("nation"))
-				member.setNation(Nation.getNationByString(cfg.getString("nation")));
+			if (cfg.isString("nation")) {
+			  Nation n = Nation.getNationByString(cfg.getString("nation"));
+				if (n != null)
+				  member.setNation(n);
+			}
 			if (cfg.isInt("priority"))
 				member.setPriority(cfg.getInt("priority"));
 			if (cfg.isList("permissions")) {
@@ -166,7 +167,7 @@ public class ConfigLoader {
 			if (nation.getCapital() != null)
 				cs.set("capital", nation.getCapital().toString());
 			cs.set("hexcolor", "#" + Integer.toHexString(nation.getHEXcolor()));
-			cs.set("mcolor", nation.getMCcolor().toString());
+			cs.set("mcolor", nation.getMCcolor().getChar()+"");
 			if (!Estate.getEstates().isEmpty()) {
 				ArrayList<String> estates = new ArrayList<>();
 				for (Estate estate : nation.getEstates()) {
