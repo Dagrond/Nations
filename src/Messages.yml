@@ -40,6 +40,12 @@ added_to_nation: "Pomyslnie dodano gracza %1 do panstwa %2!"
 joined_nation: "Dolaczyles do panstwa %1!"
 deleted_from_nation: "Pomyslnie usunieto gracza %1 z panstwa %2"
 kicked_from_nation: "Zostales wyrzucony z panstwa %1!"
+member_info: "Informacje o graczu %1:"
+member_info_nation: "Panstwo: %1"
+member_info_role: "Rola w panstwie: %1"
+member_info_prefix: "Prefix: %1"
+member_info_priority: "Priorytet: %1"
+member_info_permissions: "Uprawnienia: %1"
 
 #error messages
 error_console_no_region: "Nie mozna zaladowac prowincji %1, poniewaz region %2 w swiecie %3 nie istnieje!"

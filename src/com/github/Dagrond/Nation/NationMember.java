@@ -25,6 +25,7 @@ public class NationMember {
 	private static HashSet<NationMember> members = new HashSet<>(); // NationMember instances of currently online players
 	private static ConfigLoader config;
 	private UUID player; // UUID of current member
+	private String prefix;
 	private Nation nation = null; // nation of this player
 	private int priority = 0; // priority of this player
 	private HashSet<NationPerm> permissions = new HashSet<>(); // permissions of this player
@@ -44,6 +45,10 @@ public class NationMember {
 		save();
 	}
 
+	public void setPrefix(String prefix) {
+	  this.prefix = prefix;
+	}
+	
 	public void setNation(Nation nation) {
 		priority = 0;
 		permissions.clear();
@@ -97,6 +102,10 @@ public class NationMember {
 		return player;
 	}
 
+	public String getPrefix() {
+	  return prefix;
+	}
+	
 	public Nation getNation() {
 		return nation;
 	}

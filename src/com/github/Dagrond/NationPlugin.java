@@ -69,9 +69,8 @@ public final class NationPlugin extends JavaPlugin {
 		this.setupPermissions();
 		this.setupChat();
 		getCommand("Nation").setExecutor(new NationCommand(config));
-		if (sender != null) {
+		if (sender != null)
 			sender.sendMessage(Msg.get("reloaded", true, System.currentTimeMillis()-milis+""));
-		}
 	}
 
 	public DynmapAPI getDynmap() {

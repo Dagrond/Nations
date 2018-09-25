@@ -176,9 +176,6 @@ public class NationCommand implements CommandExecutor {
 											"/at a n assistant <panstwo> <add/del/list> (gracz)"));
 							} else
 								sender.sendMessage(Msg.get("error_usage", true, "/n help admin"));
-						} else if (args[1].equalsIgnoreCase("reload")) {
-						  args[2] = ""; //if it is stupid, but works...
-							config.getMain().reload(sender);
 						} else if (args[1].equalsIgnoreCase("estate") || args[1].equalsIgnoreCase("e")) {
 							if (args.length > 2) {
 								if (args[2].equalsIgnoreCase("info")) {
@@ -297,12 +294,31 @@ public class NationCommand implements CommandExecutor {
 						        sender.sendMessage(Msg.get("error_has_to_played_before", true, args[3]));
 						    } else
 						      sender.sendMessage(Msg.get("error_usage", true, "/n a m del (gracz)"));
-						  } else
+						  } else if (args[2].equalsIgnoreCase("info")) {
+						    if (args.length > 3) {
+						      NationMember member = NationMember.getNationMember(Bukkit.getOfflinePlayer(args[3]).getUniqueId());
+						      Nation nation = member.getNation();
+						      sender.sendMessage(Msg.get("member_info", true, args[3]));
+						      sender.sendMessage(Msg.get("member_info_nation", false, (nation != null ? nation.getDisplayName() : Msg.get("raw_without_nation", false))));
+						      String role = Msg.get("none", false);
+						      if (nation.isAssistant(member.getUUID()))
+						        role = Msg.get("raw_assistant", false);
+						      else if (nation.isKing(member.getUUID()))
+						        role = Msg.get("raw_king", false);
+						      sender.sendMessage(Msg.get("member_info_role", false, role));
+						      sender.sendMessage(Msg.get("member_info_prefix", false, member.getPrefix()));
+						      sender.sendMessage(Msg.get("member_info_priority", false, member.getPriority()+""));
+						      sender.sendMessage(Msg.get("member_info_permissions", false, member.getPermissionsList()));
+						    } else 
+						      sender.sendMessage(Msg.get("error_usage", true, "/n a m info (gracz)"));
+						  } else 
 						    sender.sendMessage(Msg.get("error_usage", true, "/n a m list/add/del/info"));
 						} else
 							sender.sendMessage(Msg.get("error_usage", true, "/n help admin"));
 					} else
 						sender.sendMessage(Msg.get("error_permission", true));
+				} else if (args.length > 1 && args[0].equalsIgnoreCase("a") && args[1].equalsIgnoreCase("reload")) {
+				  config.getMain().reload(sender);
 				} else
 					sender.sendMessage(Msg.get("error_usage", true, "/n help admin"));
 			} else if (args[0].equalsIgnoreCase("ban")) {
