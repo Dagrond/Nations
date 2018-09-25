@@ -76,7 +76,12 @@ error_not_in_own_nation: "Nie jestes na terenie swojego panstwa! Wiadomosc zosta
 error_not_in_nation: "Gracz %1 nie nalezy do zadnego panstwa!"
 
 #help pages
-
+help_main: "Glowna strona pomocy. Wybierz sekcje:"
+help_admin: "%s/n help admin %n- Komendy administratora."
+help_members: "%s/n help members %n- Komendy do zarzadzania poddanymi."
+help_war: "%s/n help war %n- Informacje o wojnach."
+help_region: "%s/n help regions %n- Komendy do tworzenia regionów."
+help_permissions: "%s/n help perms %n- Informacje o uprawnieniach." 
 
 #Simple messages
 #(Messages that are used instead of variables in some situations)

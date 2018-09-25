@@ -324,8 +324,20 @@ public class NationCommand implements CommandExecutor {
 			} else if (args[0].equalsIgnoreCase("ban")) {
 				sender.sendMessage("todo...");
 			} else if (args[0].equalsIgnoreCase("help")) {
-				sender.sendMessage(">pluginy Oskara");
-				sender.sendMessage(">jakas strona pomocy na kiju");
+			  if (args.length < 2) {
+  				sender.sendMessage(Msg.get("help_main", true));
+  				sender.sendMessage(Msg.get("help_admin", false));
+  				sender.sendMessage(Msg.get("help_members", false));
+  				sender.sendMessage(Msg.get("help_war", false));
+  				sender.sendMessage(Msg.get("help_region", false));
+  				sender.sendMessage(Msg.get("help_permissions", false));
+			  } else {
+			    if (args[1].equalsIgnoreCase("admin")) {
+			      
+			    } else {
+			      sender.sendMessage(Msg.get("error_usage", true, "/n help"));
+			    }
+			  }
 			} else {
 				sender.sendMessage(Msg.get("error_usage", true, "/n help"));
 			}

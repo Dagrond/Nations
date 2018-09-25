@@ -77,7 +77,10 @@ public class NationMember {
 
 	// booleans
 	public boolean hasPermission(NationPerm permission) {
-		return permissions.contains(permission);
+		if (permissions.contains(permission) || isKing() || isAssistant())
+		  return true;
+		else
+		  return false;
 	}
 
 	public boolean hasNation() {
