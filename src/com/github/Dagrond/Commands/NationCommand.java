@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 import com.github.Dagrond.Nation.Estate;
 import com.github.Dagrond.Nation.Nation;
 import com.github.Dagrond.Nation.NationMember;
+import com.github.Dagrond.Nation.NationMember.NationPerm;
 import com.github.Dagrond.Utils.ConfigLoader;
 import com.github.Dagrond.Utils.Msg;
 import com.sk89q.worldguard.bukkit.WGBukkit;
@@ -322,8 +323,68 @@ public class NationCommand implements CommandExecutor {
 				} else
 					sender.sendMessage(Msg.get("error_usage", true, "/n help admin"));
 			} else if (args[0].equalsIgnoreCase("ban")) {
-				sender.sendMessage("todo...");
-			} else if (args[0].equalsIgnoreCase("help")) {
+				if (sender instanceof Player) {
+				  NationMember member = NationMember.getNationMember(((Player) sender).getUniqueId());
+				  if (member.hasNation()) {
+				    Nation nation = member.getNation();
+				    if (member.hasPermission(NationPerm.BAN)) {
+				      if (args.length > 1) {
+				        OfflinePlayer player = Bukkit.getOfflinePlayer(args[1]);
+				        UUID uuid = player.getUniqueId();
+				        if (config.isSavedMember(uuid)) {
+				          if (!nation.isBanned(uuid)) {
+				            NationMember banMember = NationMember.getNationMember(uuid);
+				            if (banMember.getNation() == null || !banMember.getNation().equals(nation)) {
+				              nation.addBannedPlayer(uuid);
+				              sender.sendMessage(Msg.get("banned", true, args[1]));
+				              if (player.isOnline()) 
+				                player.getPlayer().sendMessage(Msg.get("been_banned", true, nation.getDisplayName()));
+				            } else
+				              sender.sendMessage(Msg.get("error_in_nation", true, args[1]));
+				          } else
+				            sender.sendMessage(Msg.get("error_already_banned", true, args[1]));
+				        } else
+				          sender.sendMessage(Msg.get("error_has_to_played_before", true, args[1]));
+				      } else
+				        sender.sendMessage(Msg.get("error_usage", true, "/n ban (gracz)"));
+				    } else
+				      sender.sendMessage(Msg.get("error_need_permission", true, "BAN"));
+				  } else
+				    sender.sendMessage(Msg.get("error_not_in_nation_self", true));
+				} else
+				  sender.sendMessage(Msg.get("error_must_be_a_player", true));
+			} else if (args[0].equalsIgnoreCase("unban")) {
+        if (sender instanceof Player) {
+          NationMember member = NationMember.getNationMember(((Player) sender).getUniqueId());
+          if (member.hasNation()) {
+            Nation nation = member.getNation();
+            if (member.hasPermission(NationPerm.BAN)) {
+              if (args.length > 1) {
+                OfflinePlayer player = Bukkit.getOfflinePlayer(args[1]);
+                UUID uuid = player.getUniqueId();
+                if (config.isSavedMember(uuid)) {
+                  if (!nation.isBanned(uuid)) {
+                    NationMember banMember = NationMember.getNationMember(uuid);
+                    if (banMember.getNation() == null || !banMember.getNation().equals(nation)) {
+                      nation.addBannedPlayer(uuid);
+                      sender.sendMessage(Msg.get("banned", true, args[1]));
+                      if (player.isOnline()) 
+                        player.getPlayer().sendMessage(Msg.get("been_banned", true, nation.getDisplayName()));
+                    } else
+                      sender.sendMessage(Msg.get("error_in_nation", true, args[1]));
+                  } else
+                    sender.sendMessage(Msg.get("error_already_banned", true, args[1]));
+                } else
+                  sender.sendMessage(Msg.get("error_has_to_played_before", true, args[1]));
+              } else
+                sender.sendMessage(Msg.get("error_usage", true, "/n ban (gracz)"));
+            } else
+              sender.sendMessage(Msg.get("error_need_permission", true, "BAN"));
+          } else
+            sender.sendMessage(Msg.get("error_not_in_nation_self", true));
+        } else
+          sender.sendMessage(Msg.get("error_must_be_a_player", true));
+      } else if (args[0].equalsIgnoreCase("help")) {
 			  if (args.length < 2) {
   				sender.sendMessage(Msg.get("help_main", true));
   				sender.sendMessage(Msg.get("help_admin", false));

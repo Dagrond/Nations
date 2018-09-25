@@ -46,6 +46,8 @@ member_info_role: "Rola w panstwie: %1"
 member_info_prefix: "Prefix: %1"
 member_info_priority: "Priorytet: %1"
 member_info_permissions: "Uprawnienia: %1"
+banned: "Pomyslnie zbanowales gracza %1!"
+been_banned: "Zostales zbanowany w panstwie %1!"
 
 #error messages
 error_console_no_region: "Nie mozna zaladowac prowincji %1, poniewaz region %2 w swiecie %3 nie istnieje!"
@@ -74,6 +76,10 @@ error_estate_belongs_to_other_nation: "Prowincja %1 nalezy juz do panstwa %2! Us
 error_already_in_nation: "Gracz %1 nalezy juz do panstwa %2! Aby to zrobic, gracz musi byc bezpanstwowy."
 error_not_in_own_nation: "Nie jestes na terenie swojego panstwa! Wiadomosc zostala wyslana do graczy w obrebie 100 kratek."
 error_not_in_nation: "Gracz %1 nie nalezy do zadnego panstwa!"
+error_not_in_nation_self: "Nie nalezysz do zadnego panstwa!"
+error_need_permission: "Aby to zrobic potrzebujesz uprawnienia: %1"
+error_already_banned: "Gracz %1 jest juz zbanowany w Twojej frakcji! Aby go odbanowac, uzyj %s/n unban %1%n."
+error_in_nation: "Gracz %1 jest w Twoim panstwie! Aby go zbanowac, musisz najpierw uzyc: %s/n kick %1%n!"
 
 #help pages
 help_main: "Glowna strona pomocy. Wybierz sekcje:"

@@ -121,7 +121,7 @@ public class ConfigLoader {
 				++loadedNations;
 				// loading nation members
 				for (Player player : Bukkit.getOnlinePlayers()) {
-					loadMember(player.getUniqueId());
+					NationMember.addOnlineMember(loadMember(player.getUniqueId()));
 				}
 			}
 		}
