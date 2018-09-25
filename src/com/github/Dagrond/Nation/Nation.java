@@ -302,6 +302,15 @@ public class Nation {
 		}
 		return null;
 	}
+	
+  public static Nation getPlayerNation(UUID player) {
+    for (Nation n : nations) {
+      if (n.isMember(player)) {
+        return n;
+      }
+    }
+    return null;
+  }
 
 	public static void purge() {
 	  nations.clear();

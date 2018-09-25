@@ -43,6 +43,7 @@ public final class NationPlugin extends JavaPlugin {
 
 	public void reload(CommandSender sender) {
 	 // clear old data
+	 long milis = System.currentTimeMillis();
 	 NationMember.purge();
 	 Estate.purge();
 	 Nation.purge();
@@ -68,8 +69,9 @@ public final class NationPlugin extends JavaPlugin {
 		this.setupPermissions();
 		this.setupChat();
 		getCommand("Nation").setExecutor(new NationCommand(config));
-		if (sender != null)
-			sender.sendMessage(Msg.get("reloaded", true));
+		if (sender != null) {
+			sender.sendMessage(Msg.get("reloaded", true, System.currentTimeMillis()-milis+""));
+		}
 	}
 
 	public DynmapAPI getDynmap() {

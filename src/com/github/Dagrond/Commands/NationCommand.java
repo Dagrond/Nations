@@ -177,6 +177,7 @@ public class NationCommand implements CommandExecutor {
 							} else
 								sender.sendMessage(Msg.get("error_usage", true, "/n help admin"));
 						} else if (args[1].equalsIgnoreCase("reload")) {
+						  args[2] = ""; //if it is stupid, but works...
 							config.getMain().reload(sender);
 						} else if (args[1].equalsIgnoreCase("estate") || args[1].equalsIgnoreCase("e")) {
 							if (args.length > 2) {
@@ -184,19 +185,11 @@ public class NationCommand implements CommandExecutor {
 									if (args.length > 3) {
 										if (Estate.isEstate(args[3])) {
 											Estate estate = Estate.getEstate(args[3]);
-											sender.sendMessage(Msg.get("estate_info", true,
-													(estate.getNation() != null ? estate.getNation().getMCcolor()
-															: ChatColor.GRAY) + args[3]));
-											sender.sendMessage(Msg.get("estate_info_nation", false,
-													(estate.getNation() != null ? estate.getNation().getDisplayName()
-															: Msg.get("raw_not_claimed", false))));
-											sender.sendMessage(Msg.get("estate_info_region", false,
-													estate.getRegion().toString(), estate.getWorld().getName()));
+											sender.sendMessage(Msg.get("estate_info", true, (estate.getNation() != null ? estate.getNation().getMCcolor() : ChatColor.GRAY) + args[3]));
+											sender.sendMessage(Msg.get("estate_info_nation", false, (estate.getNation() != null ? estate.getNation().getDisplayName() : Msg.get("raw_not_claimed", false))));
+											sender.sendMessage(Msg.get("estate_info_region", false, estate.getRegion().toString(), estate.getWorld().getName()));
 											Location loc = estate.getSpawn();
-											sender.sendMessage(Msg.get("estate_info_spawn", false,
-													Msg.get("loc", false, Double.toString(loc.getX()),
-															Double.toString(loc.getY()), Double.toString(loc.getZ()),
-															loc.getWorld().getName())));
+											sender.sendMessage(Msg.get("estate_info_spawn", false, Msg.get("loc", false, Double.toString(loc.getX()), Double.toString(loc.getY()), Double.toString(loc.getZ()), loc.getWorld().getName())));
 											sender.sendMessage("todo...");
 										} else
 											sender.sendMessage(Msg.get("error_estate_not_exist", true, args[3]));
@@ -214,31 +207,19 @@ public class NationCommand implements CommandExecutor {
 												if (region != null) {
 													if (region instanceof ProtectedPolygonalRegion) {
 														Location loc = player.getLocation();
-														if (WGBukkit.getRegionManager(loc.getWorld())
-																.getApplicableRegions(loc).getRegions()
-																.contains(region)) {
-															new Estate(args[3], loc, (ProtectedPolygonalRegion) region,
-																	config);
-															sender.sendMessage(Msg.get("estate_created", true, args[3],
-																	args[4], player.getWorld().getName(),
-																	Msg.get("loc", false, Double.toString(loc.getX()),
-																			Double.toString(loc.getY()),
-																			Double.toString(loc.getZ()),
-																			loc.getWorld().getName())));
+														if (WGBukkit.getRegionManager(loc.getWorld()).getApplicableRegions(loc).getRegions().contains(region)) {
+															new Estate(args[3], loc, (ProtectedPolygonalRegion) region, config);
+															sender.sendMessage(Msg.get("estate_created", true, args[3], args[4], player.getWorld().getName(),Msg.get("loc", false, Double.toString(loc.getX()), Double.toString(loc.getY()), Double.toString(loc.getZ()), loc.getWorld().getName())));
 														} else
-															sender.sendMessage(
-																	Msg.get("error_not_in_region", true, args[3]));
+															sender.sendMessage(Msg.get("error_not_in_region", true, args[3]));
 													} else
-														sender.sendMessage(Msg.get("error_no_polygonal", true, args[4],
-																player.getWorld().getName()));
+														sender.sendMessage(Msg.get("error_no_polygonal", true, args[4], player.getWorld().getName()));
 												} else
-													sender.sendMessage(Msg.get("error_no_region", true, args[4],
-															player.getWorld().getName()));
+													sender.sendMessage(Msg.get("error_no_region", true, args[4], player.getWorld().getName()));
 											} else
 												sender.sendMessage(Msg.get("error_already_estate", true, args[3]));
 										} else
-											sender.sendMessage(
-													Msg.get("error_usage", true, "/n a e add (nazwa) (region)"));
+											sender.sendMessage(Msg.get("error_usage", true, "/n a e add (nazwa) (region)"));
 									} else
 										sender.sendMessage(Msg.get("error_must_be_a_player", true));
 								} else if (args[2].equalsIgnoreCase("del")) {
@@ -258,35 +239,29 @@ public class NationCommand implements CommandExecutor {
 												Nation nation = Nation.getNationByString(args[4]);
 												if (!nation.estateBelongs(estate)) {
 													if (estate.getNation() != null) {
-														sender.sendMessage(
-																Msg.get("error_estate_belongs_to_other_nation", true,
-																		args[3], estate.getNation().getDisplayName()));
+														sender.sendMessage(Msg.get("error_estate_belongs_to_other_nation", true, args[3], estate.getNation().getDisplayName()));
 														estate.clearAffiliation();
 													}
 													nation.addEstate(estate);
 													estate.setNation(nation);
-													sender.sendMessage(Msg.get("estate_joined_nation", true, args[3],
-															nation.getDisplayName()));
+													sender.sendMessage(Msg.get("estate_joined_nation", true, args[3], nation.getDisplayName()));
 												} else
-													sender.sendMessage(Msg.get("error_estate_already_belongs", true,
-															args[3], nation.getDisplayName()));
+													sender.sendMessage(Msg.get("error_estate_already_belongs", true, args[3], nation.getDisplayName()));
 											} else
 												sender.sendMessage(Msg.get("error_not_a_nation", true, args[4]));
 										} else
 											sender.sendMessage(Msg.get("error_estate_not_exist", true, args[3]));
 									} else
-										sender.sendMessage(
-												Msg.get("error_usage", true, "/n a e give (prowincja) (panstwo)"));
+										sender.sendMessage(Msg.get("error_usage", true, "/n a e give (prowincja) (panstwo)"));
 								} else
 									sender.sendMessage(Msg.get("error_usage", true, "/n help admin"));
 							} else
-								sender.sendMessage(
-										Msg.get("error_usage", true, "/n a e info/list/add/del/give <nazwa>"));
+								sender.sendMessage(Msg.get("error_usage", true, "/n a e info/list/add/del/give <nazwa>"));
 						} else if (args[1].equalsIgnoreCase("member") || args[1].equalsIgnoreCase("m")) {
 						  if (args[2].equalsIgnoreCase("list")) {
 						    sender.sendMessage(Msg.get("online_member_list", true, NationMember.getOnlineMembersList()));
 						  } else if (args[2].equalsIgnoreCase("add")) {
-						    if (args.length>3) {
+						    if (args.length>4) {
 						      UUID uuid = Bukkit.getOfflinePlayer(args[3]).getUniqueId();
 						      if (config.isSavedMember(uuid)) {
 						        if (Nation.isNation(args[4])) {
@@ -306,14 +281,24 @@ public class NationCommand implements CommandExecutor {
 						        sender.sendMessage(Msg.get("error_has_to_played_before", true, args[3]));
 						    } else
 						      sender.sendMessage(Msg.get("error_usage", true, "/m a m add (gracz) (panstwo)"));
-						  } else if(args[2].equalsIgnoreCase("debug")) {
-						    if (sender instanceof Player) {
-						      NationMember m = new NationMember(((Player) sender).getUniqueId());
-						      sender.sendMessage(m.getUUID().toString());
-						      sender.sendMessage(Integer.toString(m.getPriority()));
-						    }
+						  } else if (args[2].equalsIgnoreCase("del")) {
+						    if (args.length > 3) {
+						      UUID uuid = Bukkit.getOfflinePlayer(args[3]).getUniqueId();
+						      if (config.isSavedMember(uuid)) {
+						        Nation nation = Nation.getPlayerNation(uuid);
+						        if (nation != null) {
+						          NationMember.getNationMember(uuid).setNation(null);
+						          sender.sendMessage(Msg.get("deleted_from_nation", true, args[3], nation.getDisplayName()));
+						          if (Bukkit.getOfflinePlayer(args[3]).isOnline())
+						            Bukkit.getPlayer(uuid).sendMessage(Msg.get("kicked_from_nation", true, nation.getDisplayName()));
+						        } else
+						          sender.sendMessage(Msg.get("error_not_in_nation", true, args[3]));
+						      } else
+						        sender.sendMessage(Msg.get("error_has_to_played_before", true, args[3]));
+						    } else
+						      sender.sendMessage(Msg.get("error_usage", true, "/n a m del (gracz)"));
 						  } else
-						    sender.sendMessage(Msg.get("error_usage", true, "/n a m list/add/remove/info"));
+						    sender.sendMessage(Msg.get("error_usage", true, "/n a m list/add/del/info"));
 						} else
 							sender.sendMessage(Msg.get("error_usage", true, "/n help admin"));
 					} else

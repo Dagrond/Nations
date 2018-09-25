@@ -50,7 +50,8 @@ public class NationMember {
 		if (this.nation != null)
 			this.nation.delMember(player);
 		this.nation = nation;
-		nation.addMember(player);
+		if (nation != null)
+		  nation.addMember(player);
 		save();
 	}
 

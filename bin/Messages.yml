@@ -14,7 +14,7 @@ error_variable_color: "&4&l"
 
 #messages
 console_loaded: "Pomyslnie zaladowano %1 panstw i %2 prowincji!"
-reloaded: "Pomyslnie przeladowano plugin!"
+reloaded: "Pomyslnie przeladowano plugin w %1 ms!"
 nation_created: "Pomyslnie utworzyles frakcje %1 z graczem %2 jako generalem!"
 nation_list: "Panstwa (%1): %2"
 nation_created: "Pomyslnie stworzono panstwo %1!"
@@ -38,6 +38,8 @@ estate_joined_nation: "Prowincja %1 zostala pomyslnie dolaczona do panstwa %2!"
 online_member_list: "<Debug> Lista graczy online: %1"
 added_to_nation: "Pomyslnie dodano gracza %1 do panstwa %2!"
 joined_nation: "Dolaczyles do panstwa %1!"
+deleted_from_nation: "Pomyslnie usunieto gracza %1 z panstwa %2"
+kicked_from_nation: "Zostales wyrzucony z panstwa %1!"
 
 #error messages
 error_console_no_region: "Nie mozna zaladowac prowincji %1, poniewaz region %2 w swiecie %3 nie istnieje!"
@@ -65,6 +67,7 @@ error_estate_already_belongs: "Prowincja %1 nalezy juz do panstwa %2!"
 error_estate_belongs_to_other_nation: "Prowincja %1 nalezy juz do panstwa %2! Usuwanie zaleznosci..."
 error_already_in_nation: "Gracz %1 nalezy juz do panstwa %2! Aby to zrobic, gracz musi byc bezpanstwowy."
 error_not_in_own_nation: "Nie jestes na terenie swojego panstwa! Wiadomosc zostala wyslana do graczy w obrebie 100 kratek."
+error_not_in_nation: "Gracz %1 nie nalezy do zadnego panstwa!"
 
 #help pages
 
